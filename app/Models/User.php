@@ -45,4 +45,35 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    /**
+     * Get the prompts for the user.
+     */
+    public function prompts()
+    {
+        return $this->hasMany(Prompt::class);
+    }
+
+    /**
+     * Get the categories for the user.
+     */
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    /**
+     * Get the collections for the user.
+     */
+    public function collections()
+    {
+        return $this->hasMany(Collection::class);
+    }
+
+    /**
+     * Get the tags for the user.
+     */
+    public function tags()
+    {
+        return $this->hasMany(Tag::class);
+    }
 }
