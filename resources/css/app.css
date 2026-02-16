@@ -8,21 +8,21 @@
 
 @layer components {
     body {
-        @apply bg-[#030712] text-gray-100;
-        /* zinc-950 equivalent for deeper dark */
+        @apply bg-gray-50 text-gray-900 dark:bg-[#030712] dark:text-gray-100;
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .app-container {
-        @apply flex min-h-screen;
+        @apply flex min-h-screen text-gray-900 dark:text-gray-100;
     }
 
     .sidebar {
-        @apply w-64 bg-[#09090b] border-r border-white/5 flex flex-col p-4 fixed h-full overflow-y-auto shadow-2xl;
+        @apply w-64 bg-white dark:bg-[#09090b] border-r border-gray-200 dark:border-white/5 flex flex-col p-4 fixed h-full overflow-y-auto shadow-sm dark:shadow-2xl;
         transition: transform 0.3s ease-in-out;
     }
 
     .logo {
-        @apply flex items-center gap-2 text-xl font-bold text-white mb-8 px-2;
+        @apply flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white mb-8 px-2;
         animation: fadeInDown 0.5s ease-out;
     }
 
@@ -31,11 +31,11 @@
     }
 
     .nav-section-title {
-        @apply text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2;
+        @apply text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2;
     }
 
     .nav-link {
-        @apply flex items-center gap-2 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-white/[0.03] hover:text-white;
+        @apply flex items-center gap-2 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.03] hover:text-gray-900 dark:hover:text-white;
         transition: all 0.2s ease-in-out;
     }
 
@@ -44,7 +44,7 @@
     }
 
     .nav-link.active {
-        @apply bg-blue-600/10 text-blue-400 border border-blue-500/20;
+        @apply bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20;
         box-shadow: 0 0 20px rgba(37, 99, 235, 0.1);
     }
 
@@ -59,7 +59,7 @@
     }
 
     .search-input {
-        @apply w-72 bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2 text-gray-200 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 placeholder:text-gray-600;
+        @apply w-72 bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-gray-900 dark:text-gray-200 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 placeholder:text-gray-400 dark:placeholder:text-gray-600 shadow-sm;
         transition: all 0.2s ease-in-out;
     }
 
@@ -68,7 +68,7 @@
     }
 
     .btn {
-        @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900;
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900;
         transition: all 0.2s ease-in-out;
         position: relative;
         overflow: hidden;
@@ -76,6 +76,10 @@
 
     .btn:hover {
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .btn:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
@@ -92,7 +96,7 @@
     }
 
     .btn-secondary {
-        @apply bg-gray-700 text-white hover:bg-gray-600 focus:ring-gray-500;
+        @apply bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 focus:ring-gray-400 dark:focus:ring-gray-500;
     }
 
     .btn-outline-danger {
@@ -100,27 +104,30 @@
     }
 
     .card {
-        @apply bg-[#09090b] rounded-2xl border border-white/[0.05] p-6 shadow-sm overflow-hidden;
+        @apply bg-white dark:bg-[#09090b] rounded-2xl border border-gray-200 dark:border-white/[0.05] p-6 shadow-sm dark:shadow-none overflow-hidden;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         animation: fadeInUp 0.6s ease-out;
     }
 
     .card:hover {
-        @apply border-white/10;
+        @apply border-gray-300 dark:border-white/10 shadow-md;
         transform: translateY(-6px);
+    }
+
+    .dark .card:hover {
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 
     .form-label {
-        @apply block text-sm font-medium text-gray-300 mb-1;
+        @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
     }
 
     .text-muted {
-        @apply text-gray-400;
+        @apply text-gray-500 dark:text-gray-400;
     }
 
     .form-control {
-        @apply w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+        @apply w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
         transition: all 0.2s ease-in-out;
     }
 
@@ -139,16 +146,16 @@
     }
 
     .badge-blue {
-        @apply bg-blue-500/10 text-blue-400 border border-blue-500/20;
+        @apply bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20;
     }
 
     .badge-gray {
-        @apply bg-white/5 text-gray-400 border border-white/5;
+        @apply bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/5;
     }
 
     /* Favorite Button Styles */
     .favorite-btn {
-        @apply text-gray-600 hover:text-red-400 p-1 flex items-center justify-center;
+        @apply text-gray-400 dark:text-gray-600 hover:text-red-400 p-1 flex items-center justify-center;
         transition: all 0.2s ease-in-out;
     }
 
