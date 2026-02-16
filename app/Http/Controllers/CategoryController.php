@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -31,7 +32,6 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories',
-            'slug' => 'required|string|max:255|unique:categories',
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
             'color' => 'nullable|string',
@@ -40,6 +40,8 @@ class CategoryController extends Controller
         ]);
 
         $validated['user_id'] = auth()->id();
+        $validated['slug'] = Str::slug($validated['name']);
+        
         Category::create($validated);
 
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
@@ -74,7 +76,6 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
-            'slug' => 'required|string|max:255|unique:categories,slug,' . $category->id,
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
             'color' => 'nullable|string',
@@ -85,6 +86,8 @@ class CategoryController extends Controller
         if ($category->user_id !== auth()->id()) {
             abort(403);
         }
+        
+        $validated['slug'] = Str::slug($validated['name']);
         $category->update($validated);
 
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');

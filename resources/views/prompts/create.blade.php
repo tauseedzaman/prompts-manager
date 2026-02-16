@@ -12,18 +12,10 @@
     <form action="{{ route('prompts.store') }}" method="POST">
         @csrf
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="form-group">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" name="title" id="title" class="form-control" value="{{ old('title') }}" required>
-                @error('title') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="slug" class="form-label">Slug</label>
-                <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug') }}" required>
-                @error('slug') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-            </div>
+        <div class="form-group">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" name="title" id="title" class="form-control" value="{{ old('title') }}" required>
+            @error('title') <div class="text-danger text-sm">{{ $message }}</div> @enderror
         </div>
 
         <div class="form-group">
@@ -81,15 +73,4 @@
     </form>
 </div>
 
-<script>
-    // Simple slug generator
-    document.getElementById('title').addEventListener('input', function() {
-        const title = this.value;
-        const slug = title.toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/[\s_-]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-        document.getElementById('slug').value = slug;
-    });
-</script>
 @endsection

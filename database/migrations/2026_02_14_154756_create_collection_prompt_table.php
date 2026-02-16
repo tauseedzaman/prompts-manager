@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('collection_prompt', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('collection_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('prompt_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('collection_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('prompt_id')->constrained()->cascadeOnDelete();
             $table->integer('sort_order')->default(0);
             $table->timestamps();
         });

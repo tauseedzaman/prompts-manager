@@ -19,11 +19,6 @@
             @error('name') <div class="text-danger text-sm">{{ $message }}</div> @enderror
         </div>
 
-        <div class="form-group">
-            <label for="slug" class="form-label">Slug</label>
-            <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug', $collection->slug) }}" required>
-            @error('slug') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-        </div>
 
         <div class="form-group">
             <label for="description" class="form-label">Description</label>

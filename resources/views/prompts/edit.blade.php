@@ -13,18 +13,10 @@
         @csrf
         @method('PUT')
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="form-group">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" name="title" id="title" class="form-control" value="{{ old('title', $prompt->title) }}" required>
-                @error('title') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="slug" class="form-label">Slug</label>
-                <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug', $prompt->slug) }}" required>
-                @error('slug') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-            </div>
+        <div class="form-group">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" name="title" id="title" class="form-control" value="{{ old('title', $prompt->title) }}" required>
+            @error('title') <div class="text-danger text-sm">{{ $message }}</div> @enderror
         </div>
 
         <div class="form-group">

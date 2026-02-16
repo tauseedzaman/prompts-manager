@@ -8,6 +8,7 @@ use App\Models\Prompt;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Collection;
+use Illuminate\Support\Str;
 
 class PromptController extends Controller
 {
@@ -60,7 +61,6 @@ class PromptController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:prompts',
             'category_id' => 'required|exists:categories,id',
             'prompt_text' => 'required|string',
             'description' => 'nullable|string',
@@ -74,11 +74,16 @@ class PromptController extends Controller
             'collections.*' => 'exists:collections,id',
         ]);
 
-        if ($request->is_template) {
-           // Handle variables_schema logic if needed (validation of JSON)
+        $validated['user_id'] = auth()->id();
+        $validated['slug'] = Str::slug($validated['title']);
+        
+        // Ensure slug is unique for this user
+        $baseSlug = $validated['slug'];
+        $count = 1;
+        while (Prompt::where('user_id', auth()->id())->where('slug', $validated['slug'])->exists()) {
+            $validated['slug'] = $baseSlug . '-' . $count++;
         }
 
-        $validated['user_id'] = auth()->id();
         $prompt = Prompt::create($validated);
 
         if ($request->has('tags')) {
@@ -127,7 +132,6 @@ class PromptController extends Controller
         }
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:prompts,slug,' . $prompt->id,
             'category_id' => 'required|exists:categories,id',
             'prompt_text' => 'required|string',
             'description' => 'nullable|string',
@@ -140,6 +144,15 @@ class PromptController extends Controller
              'collections' => 'array',
             'collections.*' => 'exists:collections,id',
         ]);
+
+        if ($prompt->title !== $validated['title']) {
+            $validated['slug'] = Str::slug($validated['title']);
+            $baseSlug = $validated['slug'];
+            $count = 1;
+            while (Prompt::where('user_id', auth()->id())->where('slug', $validated['slug'])->where('id', '!=', $prompt->id)->exists()) {
+                $validated['slug'] = $baseSlug . '-' . $count++;
+            }
+        }
 
         $prompt->update($validated);
 
@@ -172,6 +185,35 @@ class PromptController extends Controller
         return response()->json([
             'text' => $prompt->prompt_text,
             'message' => 'Copied to clipboard!'
+        ]);
+    }
+
+    /**
+     * Display a listing of favorited prompts.
+     */
+    public function favorites()
+    {
+        $prompts = \App\Models\Prompt::where('user_id', auth()->id())
+            ->where('is_favorite', true)
+            ->with(['category', 'tags'])
+            ->latest()
+            ->paginate(12);
+
+        return view('prompts.favorites', compact('prompts'));
+    }
+
+    public function toggleFavorite(Prompt $prompt)
+    {
+        if ($prompt->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $prompt->is_favorite = !$prompt->is_favorite;
+        $prompt->save();
+
+        return response()->json([
+            'is_favorite' => $prompt->is_favorite,
+            'message' => $prompt->is_favorite ? 'Added to favorites!' : 'Removed from favorites!'
         ]);
     }
 }

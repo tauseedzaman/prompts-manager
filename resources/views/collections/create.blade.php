@@ -17,31 +17,4 @@
             @error('name') <div class="text-danger text-sm">{{ $message }}</div> @enderror
         </div>
 
-        <div class="form-group">
-            <label for="slug" class="form-label">Slug</label>
-            <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug') }}" required>
-            @error('slug') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-        </div>
-
-        <div class="form-group">
-            <label for="description" class="form-label">Description</label>
-            <textarea name="description" id="description" rows="3" class="form-control">{{ old('description') }}</textarea>
-        </div>
-
-        <div class="flex justify-end gap-2 mt-4">
-            <button type="submit" class="btn btn-primary">Save Collection</button>
-        </div>
-    </form>
-</div>
-
-<script>
-    document.getElementById('name').addEventListener('input', function() {
-        const name = this.value;
-        const slug = name.toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/[\s_-]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-        document.getElementById('slug').value = slug;
-    });
-</script>
 @endsection

@@ -19,15 +19,14 @@
             @error('name') <div class="text-danger text-sm">{{ $message }}</div> @enderror
         </div>
 
-        <div class="form-group">
-            <label for="slug" class="form-label">Slug</label>
-            <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug', $category->slug) }}" required>
-            @error('slug') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-        </div>
 
         <div class="form-group">
-            <label for="color" class="form-label">Color (Hex or name)</label>
-            <input type="text" name="color" id="color" class="form-control" value="{{ old('color', $category->color) }}">
+            <label for="color" class="form-label">Color</label>
+            <div class="flex items-center gap-3">
+                <input type="color" name="color" id="color" class="h-10 w-20 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ old('color', $category->color ?? '#3b82f6') }}">
+                <input type="text" id="color-hex" class="form-control flex-1" value="{{ old('color', $category->color ?? '#3b82f6') }}" readonly>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Choose a color to represent this category</p>
         </div>
 
         <div class="form-group">
@@ -48,4 +47,19 @@
         </div>
     </form>
 </div>
+@push('scripts')
+<script>
+    // Sync color picker with hex input
+    document.addEventListener('DOMContentLoaded', function() {
+        const colorPicker = document.getElementById('color');
+        const colorHex = document.getElementById('color-hex');
+        
+        if (colorPicker && colorHex) {
+            colorPicker.addEventListener('input', function() {
+                colorHex.value = this.value.toUpperCase();
+            });
+        }
+    });
+</script>
+@endpush
 @endsection

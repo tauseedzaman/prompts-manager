@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\Tag;
+use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
@@ -32,11 +32,12 @@ class TagController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:tags',
-            'slug' => 'required|string|max:255|unique:tags',
             'color' => 'nullable|string',
         ]);
 
         $validated['user_id'] = auth()->id();
+        $validated['slug'] = Str::slug($validated['name']);
+        
         Tag::create($validated);
 
         return redirect()->route('tags.index')->with('success', 'Tag created successfully.');
@@ -71,13 +72,14 @@ class TagController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:tags,name,' . $tag->id,
-            'slug' => 'required|string|max:255|unique:tags,slug,' . $tag->id,
             'color' => 'nullable|string',
         ]);
 
         if ($tag->user_id !== auth()->id()) {
             abort(403);
         }
+        
+        $validated['slug'] = Str::slug($validated['name']);
         $tag->update($validated);
 
         return redirect()->route('tags.index')->with('success', 'Tag updated successfully.');

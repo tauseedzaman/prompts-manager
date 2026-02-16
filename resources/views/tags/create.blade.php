@@ -17,15 +17,14 @@
             @error('name') <div class="text-danger text-sm">{{ $message }}</div> @enderror
         </div>
 
-        <div class="form-group">
-            <label for="slug" class="form-label">Slug</label>
-            <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug') }}" required>
-            @error('slug') <div class="text-danger text-sm">{{ $message }}</div> @enderror
-        </div>
 
         <div class="form-group">
-            <label for="color" class="form-label">Color (Hex)</label>
-            <input type="text" name="color" id="color" class="form-control" value="{{ old('color', '#6b7280') }}">
+            <label for="color" class="form-label">Color</label>
+            <div class="flex items-center gap-3">
+                <input type="color" name="color" id="color" class="h-10 w-20 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ old('color', '#6b7280') }}">
+                <input type="text" id="color-hex" class="form-control flex-1" value="{{ old('color', '#6b7280') }}" readonly>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Choose a color to represent this tag</p>
         </div>
 
         <div class="flex justify-end gap-2 mt-4">
@@ -35,13 +34,12 @@
 </div>
 
 <script>
-    document.getElementById('name').addEventListener('input', function() {
-        const name = this.value;
-        const slug = name.toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/[\s_-]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-        document.getElementById('slug').value = slug;
+    // Sync color picker with hex input
+    const colorPicker = document.getElementById('color');
+    const colorHex = document.getElementById('color-hex');
+    
+    colorPicker.addEventListener('input', function() {
+        colorHex.value = this.value.toUpperCase();
     });
 </script>
 @endsection

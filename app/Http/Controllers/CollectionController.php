@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Collection;
+use Illuminate\Support\Str;
 
 class CollectionController extends Controller
 {
@@ -32,10 +33,18 @@ class CollectionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:collections',
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
         ]);
+
+        $validated['slug'] = Str::slug($validated['name']);
+        
+        // Ensure slug is unique for this user
+        $baseSlug = $validated['slug'];
+        $count = 1;
+        while (Collection::where('user_id', auth()->id())->where('slug', $validated['slug'])->exists()) {
+            $validated['slug'] = $baseSlug . '-' . $count++;
+        }
 
         // Assuming user_id is nullable or handled by auth() later.
         // $validated['user_id'] = auth()->id();
@@ -75,10 +84,18 @@ class CollectionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:collections,slug,' . $collection->id,
             'description' => 'nullable|string',
             'icon' => 'nullable|string',
         ]);
+
+        if ($collection->name !== $validated['name']) {
+            $validated['slug'] = Str::slug($validated['name']);
+            $baseSlug = $validated['slug'];
+            $count = 1;
+            while (Collection::where('user_id', auth()->id())->where('slug', $validated['slug'])->where('id', '!=', $collection->id)->exists()) {
+                $validated['slug'] = $baseSlug . '-' . $count++;
+            }
+        }
 
         if ($collection->user_id !== auth()->id()) {
             abort(403);
