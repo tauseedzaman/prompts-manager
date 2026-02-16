@@ -106,19 +106,109 @@
                     </div>
                 </div>
             </div>
+        <!-- How it Works Section -->
+        <section id="how-it-works" class="py-20 bg-gray-50 dark:bg-gray-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">How it Works</h2>
+                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Get organized in minutes with our simple three-step workflow.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">1</div>
+                        <h3 class="text-xl font-bold mb-3">Create Prompts</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Save your AI prompts with titles, categories, and tags for easy identification.</p>
+                    </div>
+                    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">2</div>
+                        <h3 class="text-xl font-bold mb-3">Organize into Collections</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Group prompts into logical collections like 'Content Writing', 'Coding', or 'Marketing'.</p>
+                    </div>
+                    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">3</div>
+                        <h3 class="text-xl font-bold mb-3">One-Click Copy</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Instantly copy any prompt and use it in ChatGPT, Claude, or any LLM of your choice.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="py-20 bg-white dark:bg-gray-800">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h2>
+                </div>
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                        <h4 class="text-lg font-bold mb-2">Is it free to use?</h4>
+                        <p class="text-gray-600 dark:text-gray-400">Yes, the core features of Prompts Manager are completely free for individual users.</p>
+                    </div>
+                    <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                        <h4 class="text-lg font-bold mb-2">Can I share my prompts?</h4>
+                        <p class="text-gray-600 dark:text-gray-400">Currently, prompts are private to your account. Sharing features are coming in a future update.</p>
+                    </div>
+                    <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                        <h4 class="text-lg font-bold mb-2">Is my data secure?</h4>
+                        <p class="text-gray-600 dark:text-gray-400">Absolutely. We use industry-standard encryption and follow best practices to keep your data safe.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="py-20 bg-indigo-600">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-8">Ready to supercharge your AI game?</h2>
+                <p class="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto">Join thousands of engineers and creators who use Promptly to manage their AI prompt library.</p>
+                <a href="{{ route('register') }}" class="inline-block bg-white text-indigo-600 px-10 py-4 rounded-xl text-lg font-bold hover:bg-gray-100 transition-colors shadow-xl">Get Started Now</a>
+            </div>
         </section>
 
         <!-- Footer -->
-        <footer class="bg-gray-50 dark:bg-gray-900 py-12 border-t border-gray-200 dark:border-gray-800">
-            <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-                <div class="text-gray-500 dark:text-gray-400 text-sm">
-                    &copy; {{ date('Y') }} Prompts Manager. All rights reserved.
+        <footer class="bg-gray-50 dark:bg-gray-900 py-16 border-t border-gray-200 dark:border-gray-800">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-4 gap-12 mb-12">
+                    <div class="col-span-2">
+                        <div class="flex items-center gap-2 font-bold text-xl mb-4">
+                            <i class="fas fa-layer-group text-indigo-600 dark:text-indigo-400 text-2xl"></i>
+                            <span>Prompts Manager</span>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 max-w-sm">
+                            The professional way to organize, store, and manage your AI prompts. Built for efficiency and productivity.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-4">Product</h4>
+                        <ul class="space-y-2 text-gray-500 dark:text-gray-400">
+                            <li><a href="#features" class="hover:text-indigo-600 transition-colors">Features</a></li>
+                            <li><a href="#how-it-works" class="hover:text-indigo-600 transition-colors">How it Works</a></li>
+                            <li><a href="#faq" class="hover:text-indigo-600 transition-colors">FAQ</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-4">Links</h4>
+                        <ul class="space-y-2 text-gray-500 dark:text-gray-400">
+                            <li><a href="{{ route('login') }}" class="hover:text-indigo-600 transition-colors">Log In</a></li>
+                            <li><a href="{{ route('register') }}" class="hover:text-indigo-600 transition-colors">Register</a></li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="flex gap-6 mt-4 md:mt-0">
-                    <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                        <span class="sr-only">GitHub</span>
-                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
-                    </a>
+                <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-200 dark:border-gray-800">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm mb-4 md:mb-0">
+                        &copy; {{ date('Y') }} Prompts Manager. All rights reserved.
+                    </div>
+                    <div class="flex gap-6">
+                        <a href="#" class="text-gray-400 hover:text-indigo-600 transition-colors">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-600 transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-indigo-600 transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </footer>
