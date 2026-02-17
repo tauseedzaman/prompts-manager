@@ -113,17 +113,23 @@
                         <!-- User Menu -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center gap-2 focus:outline-none group">
-                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:bg-blue-700 transition-colors uppercase">
-                                    {{ substr(Auth::user()->name, 0, 2) }}
-                                </div>
+                                <img class="h-8 w-8 rounded-full object-cover border border-indigo-500/30 group-hover:border-indigo-500 transition-colors" src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
+                                <span class="text-sm font-medium text-gray-300 hidden md:block">{{ auth()->user()->name }}</span>
+                                <i class="fas fa-chevron-down text-[10px] text-gray-500"></i>
                             </button>
 
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-[#0c0c0e] rounded-xl shadow-2xl py-1 z-50 border border-white/5 ring-1 ring-black ring-opacity-5" style="display: none;">
-                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">Profile</a>
+                            <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-48 bg-[#0c0c0e] rounded-xl shadow-2xl py-2 z-50 border border-white/5 ring-1 ring-black ring-opacity-5">
+                                <a href="{{ route('users.show', auth()->user()->username ?? auth()->user()->id) }}" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">
+                                    <i class="fas fa-user-circle mr-3"></i> My Profile
+                                </a>
+                                <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">
+                                    <i class="fas fa-cog mr-3"></i> Profile Settings
+                                </a>
+                                <div class="border-t border-white/5 my-1"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">
-                                        Log Out
+                                    <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                                        <i class="fas fa-sign-out-alt mr-3"></i> Log Out
                                     </button>
                                 </form>
                             </div>

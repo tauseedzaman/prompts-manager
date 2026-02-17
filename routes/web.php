@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/prompts/{prompt}/history', [\App\Http\Controllers\PromptController::class, 'history'])->name('prompts.history');
     Route::post('/versions/{version}/copy', [\App\Http\Controllers\PromptController::class, 'copyVersion'])->name('versions.copy');
 
+    Route::get('/u/{username}', [\App\Http\Controllers\UserProfileController::class, 'show'])->name('users.show');
+    Route::post('/u/{user}/follow', [\App\Http\Controllers\UserProfileController::class, 'follow'])->name('users.follow');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

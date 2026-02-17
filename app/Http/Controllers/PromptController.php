@@ -38,7 +38,7 @@ class PromptController extends Controller
         }
 
         $prompts = $query->latest()->paginate(10);
-        $categories = Category::all();
+        $categories = Category::where('user_id', auth()->id())->get();
 
         return view('prompts.index', compact('prompts', 'categories'));
     }

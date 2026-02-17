@@ -116,12 +116,10 @@
             <div class="space-y-4">
                 <div>
                     <span class="text-xs text-muted block">Created By</span>
-                    <div class="flex items-center gap-2 mt-1">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                            {{ substr($prompt->user->name, 0, 1) }}
-                        </div>
-                        <span class="font-medium">{{ $prompt->user->name }}</span>
-                    </div>
+                    <a href="{{ route('users.show', $prompt->user->username ?? $prompt->user->id) }}" class="flex items-center gap-2 mt-1 group">
+                        <img class="w-8 h-8 rounded-full object-cover group-hover:ring-2 ring-indigo-500 transition-all" src="{{ $prompt->user->avatar_url }}" alt="{{ $prompt->user->name }}">
+                        <span class="font-medium group-hover:text-indigo-600 transition-colors">{{ $prompt->user->name }}</span>
+                    </a>
                 </div>
                 <div>
                     <span class="text-xs text-muted block">Created On</span>

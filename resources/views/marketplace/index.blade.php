@@ -44,12 +44,10 @@
                         <h3 class="text-lg font-bold mb-2 line-clamp-1">{{ $prompt->title }}</h3>
                         <p class="text-muted text-sm mb-4 line-clamp-2">{{ $prompt->description ?? 'No description provided.' }}</p>
                         
-                        <div class="flex items-center gap-2 text-xs text-muted">
-                            <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                                {{ substr($prompt->user->name, 0, 1) }}
-                            </div>
+                        <a href="{{ route('users.show', $prompt->user->username ?? $prompt->user->id) }}" class="flex items-center gap-2 text-xs text-muted hover:text-indigo-600 transition-colors">
+                            <img class="w-6 h-6 rounded-full object-cover" src="{{ $prompt->user->avatar_url }}" alt="{{ $prompt->user->name }}">
                             <span>{{ $prompt->user->name }}</span>
-                        </div>
+                        </a>
                     </div>
                     <div class="px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
                         <div class="flex gap-4 text-xs text-muted">
