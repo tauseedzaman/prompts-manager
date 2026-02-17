@@ -69,9 +69,7 @@ class PromptController extends Controller
             'variables_schema' => 'nullable|string', // JSON string or array
             'tags' => 'array',
             'tags.*' => 'exists:tags,id',
-            'variables_schema' => 'nullable|string', // JSON string or array
-            'tags' => 'array',
-            'tags.*' => 'exists:tags,id',
+            'visibility' => 'required|in:private,public',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -138,8 +136,7 @@ class PromptController extends Controller
             'variables_schema' => 'nullable|string',
             'tags' => 'array',
             'tags.*' => 'exists:tags,id',
-            'tags' => 'array',
-            'tags.*' => 'exists:tags,id',
+            'visibility' => 'required|in:private,public',
         ]);
 
         if ($prompt->title !== $validated['title']) {
@@ -212,6 +209,36 @@ class PromptController extends Controller
             'text' => $version->prompt_text,
             'message' => 'Version content copied to clipboard!'
         ]);
+    }
+
+    public function fork(Prompt $prompt)
+    {
+        if ($prompt->visibility !== 'public' && $prompt->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $newPrompt = $prompt->replicate();
+        $newPrompt->user_id = auth()->id();
+        $newPrompt->forked_from_id = $prompt->id;
+        $newPrompt->visibility = 'private'; // Forks are private by default
+        $newPrompt->is_favorite = false;
+        $newPrompt->slug = Str::slug($newPrompt->title) . '-fork-' . Str::random(5);
+        
+        // Ensure unique slug
+        $baseSlug = $newPrompt->slug;
+        $count = 1;
+        while (Prompt::where('user_id', auth()->id())->where('slug', $newPrompt->slug)->exists()) {
+            $newPrompt->slug = $baseSlug . '-' . $count++;
+        }
+
+        $newPrompt->save();
+
+        // Copy tags
+        if ($prompt->tags->count() > 0) {
+            $newPrompt->tags()->sync($prompt->tags->pluck('id')->toArray());
+        }
+
+        return redirect()->route('prompts.show', $newPrompt)->with('success', 'Prompt forked successfully! You can now edit your own copy.');
     }
 
     /**

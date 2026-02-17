@@ -32,7 +32,9 @@
                  <i class="fas fa-layer-group text-indigo-600 dark:text-indigo-400 text-2xl"></i>
                 <span>Prompts Manager</span>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-6">
+                 <a href="{{ route('marketplace.index') }}" class="font-semibold hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Marketplace</a>
+                 
                  <!-- Dark Mode Toggle -->
                 <button @click="darkMode = !darkMode" class="p-2 rounded-md text-gray-500 hover:bg-gray-200 focus:outline-none dark:text-gray-400 dark:hover:bg-gray-800 transition-all">
                     <i x-show="!darkMode" class="fas fa-sun"></i>
@@ -72,7 +74,7 @@
                         @endif
                     @endauth
                 @endif
-                <a href="#features" class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Learn More</a>
+                <a href="{{ route('marketplace.index') }}" class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Browse Marketplace</a>
             </div>
         </main>
 
@@ -106,28 +108,78 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Featured Prompts Section -->
+        @if($featuredPrompts->count() > 0)
+        <section id="featured-prompts" class="py-20 bg-gray-50 dark:bg-gray-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Featured Community Prompts</h2>
+                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Discover top-rated prompts shared by our expert community.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8 mb-12">
+                    @foreach($featuredPrompts as $prompt)
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+                            <div class="p-6 flex-grow">
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase rounded">{{ $prompt->category->name }}</span>
+                                    <div class="flex items-center text-yellow-500 text-sm font-bold">
+                                        <i class="fas fa-star mr-1"></i> {{ $prompt->average_rating }}
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-bold mb-2 line-clamp-1">{{ $prompt->title }}</h3>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">{{ $prompt->description ?? 'No description provided.' }}</p>
+                                
+                                <div class="flex items-center gap-2 text-xs text-muted">
+                                    <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
+                                        {{ substr($prompt->user->name, 0, 1) }}
+                                    </div>
+                                    <span>{{ $prompt->user->name }}</span>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs">
+                                <div class="flex gap-3 text-gray-500">
+                                    <span><i class="fas fa-code-branch mr-1"></i> {{ $prompt->forks_count ?? $prompt->forks()->count() }}</span>
+                                </div>
+                                <a href="{{ route('marketplace.show', $prompt) }}" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">View Prompt →</a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="text-center">
+                    <a href="{{ route('marketplace.index') }}" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30">
+                        Explore Full Marketplace <i class="fas fa-arrow-right text-sm"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+        @endif
+
         <!-- How it Works Section -->
-        <section id="how-it-works" class="py-20 bg-gray-50 dark:bg-gray-900">
+        <section id="how-it-works" class="py-20 bg-white dark:bg-gray-800">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">How it Works</h2>
                     <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Get organized in minutes with our simple three-step workflow.</p>
                 </div>
                 <div class="grid md:grid-cols-3 gap-8">
-                    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="relative p-8 bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">1</div>
                         <h3 class="text-xl font-bold mb-3">Create Prompts</h3>
                         <p class="text-gray-600 dark:text-gray-400">Save your AI prompts with titles, categories, and tags for easy identification.</p>
                     </div>
-                    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="relative p-8 bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">2</div>
                         <h3 class="text-xl font-bold mb-3">Share with Ease</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Export your prompts to JSON and share them with your team or use them in different accounts.</p>
+                        <p class="text-gray-600 dark:text-gray-400">Set your prompts to public to share them with the community in the Marketplace.</p>
                     </div>
-                    <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="relative p-8 bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">3</div>
-                        <h3 class="text-xl font-bold mb-3">One-Click Copy</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Instantly copy any prompt and use it in ChatGPT, Claude, or any LLM of your choice.</p>
+                        <h3 class="text-xl font-bold mb-3">Fork & Remix</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Discover prompts in the marketplace and fork them to your own library with one click.</p>
                     </div>
                 </div>
             </div>
@@ -181,6 +233,7 @@
                     <div>
                         <h4 class="font-bold mb-4">Product</h4>
                         <ul class="space-y-2 text-gray-500 dark:text-gray-400">
+                            <li><a href="{{ route('marketplace.index') }}" class="hover:text-indigo-600 transition-colors">Marketplace</a></li>
                             <li><a href="#features" class="hover:text-indigo-600 transition-colors">Features</a></li>
                             <li><a href="#how-it-works" class="hover:text-indigo-600 transition-colors">How it Works</a></li>
                             <li><a href="#faq" class="hover:text-indigo-600 transition-colors">FAQ</a></li>

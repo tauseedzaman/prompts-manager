@@ -57,4 +57,29 @@ class Prompt extends Model
     {
         return $this->hasMany(PromptVersion::class)->latest();
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(PromptRating::class);
+    }
+
+    public function forks()
+    {
+        return $this->hasMany(Prompt::class, 'forked_from_id');
+    }
+
+    public function originalPrompt()
+    {
+        return $this->belongsTo(Prompt::class, 'forked_from_id');
+    }
+
+    public function scopePublic($query)
+    {
+        return $query->where('visibility', 'public')->where('status', 'published');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->ratings()->avg('rating'), 1) ?: 0;
+    }
 }

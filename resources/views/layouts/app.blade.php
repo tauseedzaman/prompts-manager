@@ -45,29 +45,37 @@
             
             <nav>
                 <div class="nav-section">
-                    <a href="{{ route('prompts.index') }}" class="nav-link {{ request()->routeIs('prompts.index') ? 'active' : '' }}">
-                        <i class="fas fa-file-alt"></i>
-                        All Prompts
-                    </a>
-                    <a href="{{ route('prompts.favorites') }}" class="nav-link {{ request()->routeIs('prompts.favorites') ? 'active' : '' }}">
-                        <i class="fas fa-heart"></i>
-                        Favorites
+                    @auth
+                        <a href="{{ route('prompts.index') }}" class="nav-link {{ request()->routeIs('prompts.index') ? 'active' : '' }}">
+                            <i class="fas fa-file-alt"></i>
+                            All Prompts
+                        </a>
+                        <a href="{{ route('prompts.favorites') }}" class="nav-link {{ request()->routeIs('prompts.favorites') ? 'active' : '' }}">
+                            <i class="fas fa-heart"></i>
+                            Favorites
+                        </a>
+                    @endauth
+                    <a href="{{ route('marketplace.index') }}" class="nav-link {{ request()->routeIs('marketplace.*') ? 'active' : '' }}">
+                        <i class="fas fa-globe"></i>
+                        Marketplace
                     </a>
                 </div>
 
-                <div class="nav-section">
-                    <div class="nav-section-title">Library</div>
-                    
-                    <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
-                        <i class="fas fa-folder"></i>
-                        Categories
-                    </a>
+                @auth
+                    <div class="nav-section">
+                        <div class="nav-section-title">Library</div>
+                        
+                        <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                            <i class="fas fa-folder"></i>
+                            Categories
+                        </a>
 
-                    <a href="{{ route('tags.index') }}" class="nav-link {{ request()->routeIs('tags.*') ? 'active' : '' }}">
-                        <i class="fas fa-tags"></i>
-                        Tags
-                    </a>
-                </div>
+                        <a href="{{ route('tags.index') }}" class="nav-link {{ request()->routeIs('tags.*') ? 'active' : '' }}">
+                            <i class="fas fa-tags"></i>
+                            Tags
+                        </a>
+                    </div>
+                @endauth
             </nav>
         </aside>
 
@@ -95,29 +103,37 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
                         </svg>
                     </button>
-                    <a href="{{ route('prompts.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        New Prompt
-                    </a>
 
-                    <!-- User Menu -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2 focus:outline-none group">
-                            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:bg-blue-700 transition-colors uppercase">
-                                {{ substr(Auth::user()->name, 0, 2) }}
+                    @auth
+                        <a href="{{ route('prompts.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            New Prompt
+                        </a>
+
+                        <!-- User Menu -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center gap-2 focus:outline-none group">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:bg-blue-700 transition-colors uppercase">
+                                    {{ substr(Auth::user()->name, 0, 2) }}
+                                </div>
+                            </button>
+
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-[#0c0c0e] rounded-xl shadow-2xl py-1 z-50 border border-white/5 ring-1 ring-black ring-opacity-5" style="display: none;">
+                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">Profile</a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">
+                                        Log Out
+                                    </button>
+                                </form>
                             </div>
-                        </button>
-
-                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-[#0c0c0e] rounded-xl shadow-2xl py-1 z-50 border border-white/5 ring-1 ring-black ring-opacity-5" style="display: none;">
-                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">Profile</a>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-white">
-                                    Log Out
-                                </button>
-                            </form>
                         </div>
-                    </div>
+                    @else
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('login') }}" class="btn btn-secondary btn-sm">Log In</a>
+                            <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Sign Up</a>
+                        </div>
+                    @endauth
                 </div>
             </header>
 

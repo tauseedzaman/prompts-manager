@@ -28,9 +28,22 @@
                 @if($prompt->tone) <span>{{ ucfirst($prompt->tone) }}</span> @endif
             </div>
         </div>
-        <button onclick="copyToClipboard(document.getElementById('prompt-text').innerText)" class="btn btn-primary">
-            Copy Prompt
-        </button>
+        <div class="flex gap-2 items-center">
+            @if(Auth::id() == $prompt->user_id)
+                <span class="badge {{ $prompt->visibility == 'public' ? 'badge-blue' : 'badge-gray' }} flex items-center gap-1">
+                    <i class="fas fa-{{ $prompt->visibility == 'public' ? 'globe' : 'lock' }} text-[10px]"></i>
+                    {{ ucfirst($prompt->visibility) }}
+                </span>
+            @endif
+            @if($prompt->visibility == 'public')
+                <div class="flex items-center text-yellow-500 text-sm font-bold ml-2">
+                    <i class="fas fa-star mr-1"></i> {{ $prompt->average_rating }}
+                </div>
+            @endif
+            <button onclick="copyToClipboard(document.getElementById('prompt-text').innerText)" class="btn btn-primary">
+                Copy Prompt
+            </button>
+        </div>
     </div>
 
     @if($prompt->description)

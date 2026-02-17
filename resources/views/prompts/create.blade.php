@@ -67,6 +67,21 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label class="form-label">Visibility</label>
+            <div class="flex gap-4 mt-1">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="visibility" value="private" {{ old('visibility', 'private') == 'private' ? 'checked' : '' }}>
+                    <span>Private (Only you)</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="visibility" value="public" {{ old('visibility') == 'public' ? 'checked' : '' }}>
+                    <span>Public (Share in Marketplace)</span>
+                </label>
+            </div>
+            @error('visibility') <div class="text-danger text-sm">{{ $message }}</div> @enderror
+        </div>
+
         <div class="flex justify-end gap-2 mt-4">
             <button type="submit" class="btn btn-primary">Create Prompt</button>
         </div>

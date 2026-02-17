@@ -3,9 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\MarketplaceController::class, 'welcome'])->name('home');
+
+Route::get('/marketplace', [\App\Http\Controllers\MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/{prompt}', [\App\Http\Controllers\MarketplaceController::class, 'show'])->name('marketplace.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
@@ -17,6 +18,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/prompts/import', [\App\Http\Controllers\PromptController::class, 'importPage'])->name('prompts.import-page');
     Route::post('/prompts/import', [\App\Http\Controllers\PromptController::class, 'import'])->name('prompts.import');
     Route::get('/prompts/sample', [\App\Http\Controllers\PromptController::class, 'downloadSample'])->name('prompts.sample');
+    
+    // Auth-only Marketplace Routes
+    Route::post('/marketplace/{prompt}/rate', [\App\Http\Controllers\MarketplaceController::class, 'rate'])->name('marketplace.rate');
+    Route::post('/prompts/{prompt}/fork', [\App\Http\Controllers\PromptController::class, 'fork'])->name('prompts.fork');
+
     Route::resource('prompts', \App\Http\Controllers\PromptController::class);
     Route::resource('categories', \App\Http\Controllers\CategoryController::class);
     Route::resource('tags', \App\Http\Controllers\TagController::class);
