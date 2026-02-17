@@ -8,6 +8,7 @@
         <a href="{{ route('prompts.index') }}" class="btn btn-secondary">← Back</a>
     </div>
     <div class="flex gap-2">
+        <a href="{{ route('prompts.history', $prompt) }}" class="btn btn-secondary">History</a>
         <a href="{{ route('prompts.edit', $prompt) }}" class="btn btn-secondary">Edit</a>
         <form action="{{ route('prompts.destroy', $prompt) }}" method="POST" onsubmit="return confirm('Are you sure?');">
             @csrf

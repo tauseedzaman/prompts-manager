@@ -22,6 +22,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('tags', \App\Http\Controllers\TagController::class);
     Route::post('/prompts/{prompt}/copy', [\App\Http\Controllers\PromptController::class, 'copy'])->name('prompts.copy');
     Route::post('/prompts/{prompt}/toggle-favorite', [\App\Http\Controllers\PromptController::class, 'toggleFavorite'])->name('prompts.toggle-favorite');
+    Route::get('/prompts/{prompt}/history', [\App\Http\Controllers\PromptController::class, 'history'])->name('prompts.history');
+    Route::post('/versions/{version}/copy', [\App\Http\Controllers\PromptController::class, 'copyVersion'])->name('versions.copy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

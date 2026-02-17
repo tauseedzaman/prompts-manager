@@ -53,5 +53,8 @@ class Prompt extends Model
         return $this->belongsToMany(Tag::class);
     }
 
-
+    public function versions()
+    {
+        return $this->hasMany(PromptVersion::class)->latest();
+    }
 }

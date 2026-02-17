@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Prompt;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Models\PromptVersion;
 use Illuminate\Support\Str;
 
 class PromptController extends Controller
@@ -150,6 +151,15 @@ class PromptController extends Controller
             }
         }
 
+        // Save version before update
+        PromptVersion::create([
+            'prompt_id' => $prompt->id,
+            'user_id' => auth()->id(),
+            'title' => $prompt->title,
+            'prompt_text' => $prompt->prompt_text,
+            'description' => $prompt->description,
+        ]);
+
         $prompt->update($validated);
 
          if ($request->has('tags')) {
@@ -158,7 +168,7 @@ class PromptController extends Controller
         
 
 
-        return redirect()->route('prompts.index')->with('success', 'Prompt updated successfully.');
+        return redirect()->route('prompts.show', $prompt)->with('success', 'Prompt updated successfully.');
     }
 
     /**
@@ -179,6 +189,28 @@ class PromptController extends Controller
         return response()->json([
             'text' => $prompt->prompt_text,
             'message' => 'Copied to clipboard!'
+        ]);
+    }
+
+    public function history(Prompt $prompt)
+    {
+        if ($prompt->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $versions = $prompt->versions()->with('user')->paginate(10);
+        return view('prompts.history', compact('prompt', 'versions'));
+    }
+
+    public function copyVersion(PromptVersion $version)
+    {
+        if ($version->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'text' => $version->prompt_text,
+            'message' => 'Version content copied to clipboard!'
         ]);
     }
 
@@ -269,10 +301,6 @@ class PromptController extends Controller
                 'tone' => 'Professional',
                 'usage_type' => 'Snippet',
                 'is_template' => true,
-                'variables_schema' => [
-                    ['name' => 'language', 'type' => 'text', 'placeholder' => 'Python'],
-                    ['name' => 'code', 'type' => 'textarea', 'placeholder' => 'Paste your code here']
-                ],
             ]
         ];
 
