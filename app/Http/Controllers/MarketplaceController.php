@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Prompt;
 use App\Models\Category;
-use App\Models\Tag;
+use App\Models\Prompt;
 use App\Models\PromptRating;
 use Illuminate\Http\Request;
 
@@ -16,9 +15,9 @@ class MarketplaceController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('prompt_text', 'like', "%{$search}%");
+                    ->orWhere('prompt_text', 'like', "%{$search}%");
             });
         }
 
@@ -27,13 +26,13 @@ class MarketplaceController extends Controller
         }
 
         if ($request->has('tag_id')) {
-            $query->whereHas('tags', function($q) use ($request) {
+            $query->whereHas('tags', function ($q) use ($request) {
                 $q->where('tags.id', $request->tag_id);
             });
         }
 
         $prompts = $query->latest()->paginate(12);
-        $categories = Category::whereHas('prompts', function($q) {
+        $categories = Category::whereHas('prompts', function ($q) {
             $q->public();
         })->get();
 
@@ -47,7 +46,12 @@ class MarketplaceController extends Controller
         }
 
         $prompt->load(['category', 'tags', 'user', 'ratings.user']);
-        return view('marketplace.show', compact('prompt'));
+
+        $userRating = auth()->check() 
+            ? $prompt->ratings()->where('user_id', auth()->id())->first() 
+            : null;
+
+        return view('marketplace.show', compact('prompt', 'userRating'));
     }
 
     public function welcome()
@@ -61,7 +65,9 @@ class MarketplaceController extends Controller
             ->get()
             ->sortByDesc('average_rating')
             ->first();
-        if ($topRated) $featuredPrompts->push($topRated);
+        if ($topRated) {
+            $featuredPrompts->push($topRated);
+        }
 
         // 2. Most forked prompt
         $mostForked = Prompt::public()
@@ -70,7 +76,9 @@ class MarketplaceController extends Controller
             ->orderBy('forks_count', 'desc')
             ->whereNotIn('id', $featuredPrompts->pluck('id'))
             ->first();
-        if ($mostForked) $featuredPrompts->push($mostForked);
+        if ($mostForked) {
+            $featuredPrompts->push($mostForked);
+        }
 
         // 3. Random public prompt
         $random = Prompt::public()
@@ -78,9 +86,18 @@ class MarketplaceController extends Controller
             ->whereNotIn('id', $featuredPrompts->pluck('id'))
             ->inRandomOrder()
             ->first();
-        if ($random) $featuredPrompts->push($random);
+        if ($random) {
+            $featuredPrompts->push($random);
+        }
+        $stats = [
+            'prompts' => \App\Models\Prompt::count(),
+            'forks' => \App\Models\Prompt::where('forked_from_id', '!=', null)->count(), // adjust model/table
+            'creators' => \App\Models\User::has('prompts')->count(),
+            'exports' => \App\Models\User::count(),
+        ];
 
-        return view('welcome', compact('featuredPrompts'));
+        return view('welcome', compact('featuredPrompts', 'stats'));
+
     }
 
     public function rate(Request $request, Prompt $prompt)

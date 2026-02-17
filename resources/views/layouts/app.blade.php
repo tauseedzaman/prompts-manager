@@ -114,7 +114,6 @@
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center gap-2 focus:outline-none group">
                                 <img class="h-8 w-8 rounded-full object-cover border border-indigo-500/30 group-hover:border-indigo-500 transition-colors" src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
-                                <span class="text-sm font-medium text-gray-300 hidden md:block">{{ auth()->user()->name }}</span>
                                 <i class="fas fa-chevron-down text-[10px] text-gray-500"></i>
                             </button>
 

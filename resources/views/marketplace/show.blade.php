@@ -36,8 +36,14 @@
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-yellow-500 text-lg font-bold mb-1">
-                        <i class="fas fa-star mr-1"></i> {{ $prompt->average_rating }}
+                    <div class="text-yellow-500 text-lg mb-1 flex items-center justify-end gap-1">
+                        @php
+                            $avg = $prompt->average_rating;
+                        @endphp
+                        @for($i = 1; $i <= 5; $i++)
+                            <i class="{{ $i <= round($avg) ? 'fas' : ($i - 0.5 <= $avg ? 'fas fa-star-half-alt' : 'far') }} fa-star"></i>
+                        @endfor
+                        <span class="font-bold ml-1">{{ number_format($avg, 1) }}</span>
                     </div>
                     <div class="text-xs text-muted">{{ $prompt->ratings->count() }} ratings</div>
                 </div>
@@ -61,25 +67,63 @@
                 
                 @auth
                     @if(Auth::id() !== $prompt->user_id)
-                        <form action="{{ route('marketplace.rate', $prompt) }}" method="POST" class="mb-8 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                            @csrf
-                            <div class="mb-4">
-                                <label class="block text-sm font-bold mb-2">Your Rating</label>
-                                <div class="flex gap-4">
+                        @if(!$userRating)
+                            <div x-data="{ 
+                                rating: 0, 
+                                hoverRating: 0,
+                                setRating(val) { this.rating = val },
+                                setHover(val) { this.hoverRating = val }
+                            }" class="mb-8 p-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                                <h3 class="text-main font-bold mb-4">Rate this Prompt</h3>
+                                <form action="{{ route('marketplace.rate', $prompt) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="rating" :value="rating" required>
+                                    
+                                    <div class="mb-4">
+                                        <div class="flex gap-2">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <button type="button" 
+                                                    @click="setRating({{ $i }})" 
+                                                    @mouseenter="setHover({{ $i }})" 
+                                                    @mouseleave="setHover(0)"
+                                                    class="focus:outline-none transform transition-transform hover:scale-110">
+                                                    <i class="fa-star text-3xl transition-colors duration-150" 
+                                                       :class="((hoverRating || rating) >= {{ $i }}) ? 'fas text-yellow-500' : 'far text-gray-300 dark:text-gray-600'"></i>
+                                                </button>
+                                            @endfor
+                                        </div>
+                                        <p class="text-xs text-muted mt-2" x-show="rating > 0">You selected <span x-text="rating"></span> stars</p>
+                                        @error('rating')
+                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-bold mb-2">Review (Optional)</label>
+                                        <textarea name="comment" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 placeholder-gray-400" placeholder="Share your experience with this prompt..."></textarea>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary" :disabled="!rating">
+                                        Submit Review
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <div class="mb-8 p-6 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30">
+                                <div class="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold mb-2">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>You've rated this prompt</span>
+                                </div>
+                                <div class="flex gap-1 text-yellow-500 mb-2">
                                     @for($i = 1; $i <= 5; $i++)
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="rating" value="{{ $i }}" class="hidden peer" required>
-                                            <i class="fas fa-star text-2xl text-gray-300 peer-checked:text-yellow-500 hover:text-yellow-400"></i>
-                                        </label>
+                                        <i class="{{ $i <= $userRating->rating ? 'fas' : 'far' }} fa-star"></i>
                                     @endfor
                                 </div>
+                                @if($userRating->comment)
+                                    <p class="text-sm text-muted italic">"{{ $userRating->comment }}"</p>
+                                @endif
                             </div>
-                            <div class="mb-4">
-                                <label class="block text-sm font-bold mb-2">Review (Optional)</label>
-                                <textarea name="comment" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
-                        </form>
+                        @endif
                     @endif
                 @else
                     <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl text-center">

@@ -31,7 +31,12 @@ class TagController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:tags',
+            'name' => [
+                'required', 
+                'string', 
+                'max:255',
+                \Illuminate\Validation\Rule::unique('tags')->where('user_id', auth()->id())
+            ],
             'color' => 'nullable|string',
         ]);
 
@@ -71,7 +76,14 @@ class TagController extends Controller
     public function update(Request $request, Tag $tag)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:tags,name,' . $tag->id,
+            'name' => [
+                'required', 
+                'string', 
+                'max:255',
+                \Illuminate\Validation\Rule::unique('tags')
+                    ->where('user_id', auth()->id())
+                    ->ignore($tag->id)
+            ],
             'color' => 'nullable|string',
         ]);
 

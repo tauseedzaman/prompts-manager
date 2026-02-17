@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Models\Prompt;
 use App\Models\Category;
-use App\Models\Tag;
+use App\Models\Prompt;
 use App\Models\PromptVersion;
+use App\Models\Tag;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PromptController extends Controller
@@ -21,9 +20,9 @@ class PromptController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('prompt_text', 'like', "%{$search}%");
+                    ->orWhere('prompt_text', 'like', "%{$search}%");
             });
         }
 
@@ -32,7 +31,7 @@ class PromptController extends Controller
         }
 
         if ($request->has('tag_id')) {
-            $query->whereHas('tags', function($q) use ($request) {
+            $query->whereHas('tags', function ($q) use ($request) {
                 $q->where('tags.id', $request->tag_id);
             });
         }
@@ -50,6 +49,7 @@ class PromptController extends Controller
     {
         $categories = Category::where('user_id', auth()->id())->where('is_active', true)->get();
         $tags = Tag::where('user_id', auth()->id())->get();
+
         return view('prompts.create', compact('categories', 'tags'));
     }
 
@@ -59,7 +59,12 @@ class PromptController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('prompts')->where('user_id', auth()->id()),
+            ],
             'category_id' => 'required|exists:categories,id',
             'prompt_text' => 'required|string',
             'description' => 'nullable|string',
@@ -74,21 +79,13 @@ class PromptController extends Controller
 
         $validated['user_id'] = auth()->id();
         $validated['slug'] = Str::slug($validated['title']);
-        
-        // Ensure slug is unique for this user
-        $baseSlug = $validated['slug'];
-        $count = 1;
-        while (Prompt::where('user_id', auth()->id())->where('slug', $validated['slug'])->exists()) {
-            $validated['slug'] = $baseSlug . '-' . $count++;
-        }
+        $validated['status'] = 'published';
 
         $prompt = Prompt::create($validated);
 
         if ($request->has('tags')) {
             $prompt->tags()->sync($request->tags);
         }
-        
-
 
         return redirect()->route('prompts.index')->with('success', 'Prompt created successfully.');
     }
@@ -101,7 +98,8 @@ class PromptController extends Controller
         if ($prompt->user_id !== auth()->id()) {
             abort(403);
         }
-         return view('prompts.show', compact('prompt'));
+
+        return view('prompts.show', compact('prompt'));
     }
 
     /**
@@ -114,6 +112,7 @@ class PromptController extends Controller
         }
         $categories = Category::where('user_id', auth()->id())->get();
         $tags = Tag::where('user_id', auth()->id())->get();
+
         return view('prompts.edit', compact('prompt', 'categories', 'tags'));
     }
 
@@ -126,7 +125,14 @@ class PromptController extends Controller
             abort(403);
         }
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('prompts')
+                    ->where('user_id', auth()->id())
+                    ->ignore($prompt->id),
+            ],
             'category_id' => 'required|exists:categories,id',
             'prompt_text' => 'required|string',
             'description' => 'nullable|string',
@@ -141,11 +147,6 @@ class PromptController extends Controller
 
         if ($prompt->title !== $validated['title']) {
             $validated['slug'] = Str::slug($validated['title']);
-            $baseSlug = $validated['slug'];
-            $count = 1;
-            while (Prompt::where('user_id', auth()->id())->where('slug', $validated['slug'])->where('id', '!=', $prompt->id)->exists()) {
-                $validated['slug'] = $baseSlug . '-' . $count++;
-            }
         }
 
         // Save version before update
@@ -159,11 +160,9 @@ class PromptController extends Controller
 
         $prompt->update($validated);
 
-         if ($request->has('tags')) {
+        if ($request->has('tags')) {
             $prompt->tags()->sync($request->tags);
         }
-        
-
 
         return redirect()->route('prompts.show', $prompt)->with('success', 'Prompt updated successfully.');
     }
@@ -177,15 +176,16 @@ class PromptController extends Controller
             abort(403);
         }
         $prompt->delete();
+
         return redirect()->route('prompts.index')->with('success', 'Prompt deleted successfully.');
     }
-    
+
     public function copy(Prompt $prompt)
     {
         // Log valid usage here via PromptRun if implemented
         return response()->json([
             'text' => $prompt->prompt_text,
-            'message' => 'Copied to clipboard!'
+            'message' => 'Copied to clipboard!',
         ]);
     }
 
@@ -196,6 +196,7 @@ class PromptController extends Controller
         }
 
         $versions = $prompt->versions()->with('user')->paginate(10);
+
         return view('prompts.history', compact('prompt', 'versions'));
     }
 
@@ -207,7 +208,7 @@ class PromptController extends Controller
 
         return response()->json([
             'text' => $version->prompt_text,
-            'message' => 'Version content copied to clipboard!'
+            'message' => 'Version content copied to clipboard!',
         ]);
     }
 
@@ -222,13 +223,13 @@ class PromptController extends Controller
         $newPrompt->forked_from_id = $prompt->id;
         $newPrompt->visibility = 'private'; // Forks are private by default
         $newPrompt->is_favorite = false;
-        $newPrompt->slug = Str::slug($newPrompt->title) . '-fork-' . Str::random(5);
-        
+        $newPrompt->slug = Str::slug($newPrompt->title).'-fork-'.Str::random(5);
+
         // Ensure unique slug
         $baseSlug = $newPrompt->slug;
         $count = 1;
         while (Prompt::where('user_id', auth()->id())->where('slug', $newPrompt->slug)->exists()) {
-            $newPrompt->slug = $baseSlug . '-' . $count++;
+            $newPrompt->slug = $baseSlug.'-'.$count++;
         }
 
         $newPrompt->save();
@@ -261,19 +262,20 @@ class PromptController extends Controller
             abort(403);
         }
 
-        $prompt->is_favorite = !$prompt->is_favorite;
+        $prompt->is_favorite = ! $prompt->is_favorite;
         $prompt->save();
 
         return response()->json([
             'is_favorite' => $prompt->is_favorite,
-            'message' => $prompt->is_favorite ? 'Added to favorites!' : 'Removed from favorites!'
+            'message' => $prompt->is_favorite ? 'Added to favorites!' : 'Removed from favorites!',
         ]);
     }
+
     public function export()
     {
         $prompts = Prompt::where('user_id', auth()->id())->with(['category', 'tags'])->get();
-        
-        $data = $prompts->map(function($prompt) {
+
+        $data = $prompts->map(function ($prompt) {
             return [
                 'title' => $prompt->title,
                 'prompt_text' => $prompt->prompt_text,
@@ -290,9 +292,9 @@ class PromptController extends Controller
             ];
         });
 
-        $filename = 'prompts_export_' . date('Y-m-d_H-i-s') . '.json';
-        
-        return response()->streamDownload(function() use ($data) {
+        $filename = 'prompts_export_'.date('Y-m-d_H-i-s').'.json';
+
+        return response()->streamDownload(function () use ($data) {
             echo json_encode($data, JSON_PRETTY_PRINT);
         }, $filename, [
             'Content-Type' => 'application/json',
@@ -328,10 +330,10 @@ class PromptController extends Controller
                 'tone' => 'Professional',
                 'usage_type' => 'Snippet',
                 'is_template' => true,
-            ]
+            ],
         ];
 
-        return response()->streamDownload(function() use ($sample) {
+        return response()->streamDownload(function () use ($sample) {
             echo json_encode($sample, JSON_PRETTY_PRINT);
         }, 'prompts_sample.json', [
             'Content-Type' => 'application/json',
@@ -351,7 +353,7 @@ class PromptController extends Controller
             return redirect()->back()->with('error', 'Invalid JSON file format.');
         }
 
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return redirect()->back()->with('error', 'The JSON file must contain an array of prompts.');
         }
 
@@ -381,24 +383,17 @@ class PromptController extends Controller
                     'language' => $item['language'] ?? 'English',
                     'tone' => $item['tone'] ?? 'Neutral',
                     'usage_type' => $item['usage_type'] ?? 'Full Prompt',
-                    'is_template' => isset($item['is_template']) ? (bool)$item['is_template'] : false,
+                    'is_template' => isset($item['is_template']) ? (bool) $item['is_template'] : false,
                     'variables_schema' => $item['variables_schema'] ?? null,
                     'example_input' => $item['example_input'] ?? null,
                     'example_output' => $item['example_output'] ?? null,
                     'status' => 'published',
                 ];
 
-                // Ensure unique slug for this user
-                $baseSlug = $promptData['slug'];
-                $count = 1;
-                while (Prompt::where('user_id', auth()->id())->where('slug', $promptData['slug'])->exists()) {
-                    $promptData['slug'] = $baseSlug . '-' . $count++;
-                }
-
                 $prompt = Prompt::create($promptData);
 
                 // Handle tags
-                if (!empty($item['tags']) && is_array($item['tags'])) {
+                if (! empty($item['tags']) && is_array($item['tags'])) {
                     $tagIds = [];
                     foreach ($item['tags'] as $tagName) {
                         $tag = Tag::firstOrCreate(
@@ -413,7 +408,7 @@ class PromptController extends Controller
                 $importCount++;
             }
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred during import: '.$e->getMessage());
         }
 
         return redirect()->route('prompts.index')->with('success', "Successfully imported {$importCount} prompts.");
