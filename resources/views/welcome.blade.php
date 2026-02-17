@@ -83,10 +83,10 @@
                     <!-- Feature 1 -->
                     <div class="space-y-4">
                         <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                             <i class="fas fa-layer-group text-xl"></i>
+                             <i class="fas fa-file-export text-xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Collections</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Group related prompts into collections for different projects, workflows, or models.</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Import & Export</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Share your prompts across accounts and teams with industrial-grade JSON export and import tools.</p>
                     </div>
                     <!-- Feature 2 -->
                     <div class="space-y-4">
@@ -121,8 +121,8 @@
                     </div>
                     <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">2</div>
-                        <h3 class="text-xl font-bold mb-3">Organize into Collections</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Group prompts into logical collections like 'Content Writing', 'Coding', or 'Marketing'.</p>
+                        <h3 class="text-xl font-bold mb-3">Share with Ease</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Export your prompts to JSON and share them with your team or use them in different accounts.</p>
                     </div>
                     <div class="relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">3</div>
@@ -146,7 +146,7 @@
                     </div>
                     <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
                         <h4 class="text-lg font-bold mb-2">Can I share my prompts?</h4>
-                        <p class="text-gray-600 dark:text-gray-400">Currently, prompts are private to your account. Sharing features are coming in a future update.</p>
+                        <p class="text-gray-600 dark:text-gray-400">Yes! You can now export your prompts to a JSON file and share them with anyone, or import them into a different account.</p>
                     </div>
                     <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
                         <h4 class="text-lg font-bold mb-2">Is my data secure?</h4>

@@ -30,12 +30,7 @@ class PromptController extends Controller
             $query->where('category_id', $request->input('category_id'));
         }
 
-        // Filter by collection
-        if ($request->has('collection_id')) {
-            $query->whereHas('collections', function ($q) use ($request) {
-                $q->where('collections.id', $request->input('collection_id'));
-            });
-        }
+
 
         // Filter by tag
         if ($request->has('tag_id')) {
@@ -44,7 +39,7 @@ class PromptController extends Controller
             });
         }
 
-        $prompts = $query->with(['category', 'collections', 'tags'])
+        $prompts = $query->with(['category', 'tags'])
                          ->latest()
                          ->paginate($request->input('per_page', 15));
 
@@ -60,8 +55,7 @@ class PromptController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
-            'collection_ids' => 'nullable|array',
-            'collection_ids.*' => 'exists:collections,id',
+
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
         ]);
@@ -72,17 +66,14 @@ class PromptController extends Controller
             'category_id' => $validated['category_id'] ?? null,
         ]);
 
-        // Attach collections
-        if (!empty($validated['collection_ids'])) {
-            $prompt->collections()->attach($validated['collection_ids']);
-        }
+
 
         // Attach tags
         if (!empty($validated['tag_ids'])) {
             $prompt->tags()->attach($validated['tag_ids']);
         }
 
-        return response()->json($prompt->load(['category', 'collections', 'tags']), 201);
+        return response()->json($prompt->load(['category', 'tags']), 201);
     }
 
     /**
@@ -90,7 +81,7 @@ class PromptController extends Controller
      */
     public function show(Request $request, string $id)
     {
-        $prompt = $request->user()->prompts()->with(['category', 'collections', 'tags'])->findOrFail($id);
+        $prompt = $request->user()->prompts()->with(['category', 'tags'])->findOrFail($id);
         return response()->json($prompt);
     }
 
@@ -105,8 +96,7 @@ class PromptController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'content' => 'sometimes|required|string',
             'category_id' => 'nullable|exists:categories,id',
-            'collection_ids' => 'nullable|array',
-            'collection_ids.*' => 'exists:collections,id',
+
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
         ]);
@@ -117,17 +107,14 @@ class PromptController extends Controller
             'category_id' => $validated['category_id'] ?? $prompt->category_id,
         ]);
 
-        // Sync collections
-        if (isset($validated['collection_ids'])) {
-            $prompt->collections()->sync($validated['collection_ids']);
-        }
+
 
         // Sync tags
         if (isset($validated['tag_ids'])) {
             $prompt->tags()->sync($validated['tag_ids']);
         }
 
-        return response()->json($prompt->load(['category', 'collections', 'tags']));
+        return response()->json($prompt->load(['category', 'tags']));
     }
 
     /**

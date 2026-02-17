@@ -6,6 +6,12 @@
 <div class="flex justify-between items-center mb-4">
     <h1>All Prompts</h1>
     <div class="flex gap-2">
+        <a href="{{ route('prompts.export') }}" class="btn btn-secondary">
+            <i class="fas fa-download"></i> Export
+        </a>
+        <a href="{{ route('prompts.import-page') }}" class="btn btn-secondary">
+            <i class="fas fa-upload"></i> Import
+        </a>
         <a href="{{ route('prompts.create') }}" class="btn btn-primary">
             + New Prompt
         </a>

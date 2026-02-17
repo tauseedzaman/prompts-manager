@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 class Tag extends Model
 {
     use HasUuids;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $fillable = [
         'user_id',
         'name',

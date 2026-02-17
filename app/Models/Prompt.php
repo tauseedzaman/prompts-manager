@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 class Prompt extends Model
 {
     use HasUuids;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $fillable = [
         'user_id',
         'category_id',
@@ -50,9 +53,5 @@ class Prompt extends Model
         return $this->belongsToMany(Tag::class);
     }
 
-    public function collections()
-    {
-        return $this->belongsToMany(Collection::class)
-                    ->withPivot('sort_order');
-    }
+
 }

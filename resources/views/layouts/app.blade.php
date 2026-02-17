@@ -62,10 +62,7 @@
                         <i class="fas fa-folder"></i>
                         Categories
                     </a>
-                    <a href="{{ route('collections.index') }}" class="nav-link {{ request()->routeIs('collections.*') ? 'active' : '' }}">
-                        <i class="fas fa-layer-group"></i>
-                        Collections
-                    </a>
+
                     <a href="{{ route('tags.index') }}" class="nav-link {{ request()->routeIs('tags.*') ? 'active' : '' }}">
                         <i class="fas fa-tags"></i>
                         Tags
@@ -105,11 +102,10 @@
 
                     <!-- User Menu -->
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none">
-                            <span>{{ Auth::user()->name }}</span>
-                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+                        <button @click="open = !open" class="flex items-center gap-2 focus:outline-none group">
+                            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:bg-blue-700 transition-colors uppercase">
+                                {{ substr(Auth::user()->name, 0, 2) }}
+                            </div>
                         </button>
 
                         <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-[#0c0c0e] rounded-xl shadow-2xl py-1 z-50 border border-white/5 ring-1 ring-black ring-opacity-5" style="display: none;">

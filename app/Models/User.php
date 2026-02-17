@@ -14,6 +14,9 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasUuids;
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -63,13 +66,7 @@ class User extends Authenticatable
         return $this->hasMany(Category::class);
     }
 
-    /**
-     * Get the collections for the user.
-     */
-    public function collections()
-    {
-        return $this->hasMany(Collection::class);
-    }
+
 
     /**
      * Get the tags for the user.

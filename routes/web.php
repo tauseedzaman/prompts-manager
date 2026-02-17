@@ -13,9 +13,12 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::get('/prompts/favorites', [\App\Http\Controllers\PromptController::class, 'favorites'])->name('prompts.favorites');
+    Route::get('/prompts/export', [\App\Http\Controllers\PromptController::class, 'export'])->name('prompts.export');
+    Route::get('/prompts/import', [\App\Http\Controllers\PromptController::class, 'importPage'])->name('prompts.import-page');
+    Route::post('/prompts/import', [\App\Http\Controllers\PromptController::class, 'import'])->name('prompts.import');
+    Route::get('/prompts/sample', [\App\Http\Controllers\PromptController::class, 'downloadSample'])->name('prompts.sample');
     Route::resource('prompts', \App\Http\Controllers\PromptController::class);
     Route::resource('categories', \App\Http\Controllers\CategoryController::class);
-    Route::resource('collections', \App\Http\Controllers\CollectionController::class);
     Route::resource('tags', \App\Http\Controllers\TagController::class);
     Route::post('/prompts/{prompt}/copy', [\App\Http\Controllers\PromptController::class, 'copy'])->name('prompts.copy');
     Route::post('/prompts/{prompt}/toggle-favorite', [\App\Http\Controllers\PromptController::class, 'toggleFavorite'])->name('prompts.toggle-favorite');
