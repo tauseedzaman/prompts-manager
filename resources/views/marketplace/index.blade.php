@@ -54,6 +54,9 @@
                             <span><i class="fas fa-code-branch mr-1"></i> {{ $prompt->forks_count ?? $prompt->forks()->count() }}</span>
                         </div>
                         <div class="flex gap-2">
+                            <button onclick="copyToClipboard('{{ route('marketplace.show', $prompt) }}')" class="btn btn-secondary btn-sm" title="Copy link to this prompt">
+                                <i class="fas fa-link mr-1 text-[10px]"></i> Link
+                            </button>
                             <a href="{{ route('marketplace.show', $prompt) }}" class="btn btn-secondary btn-sm">View</a>
                             @auth
                                 <form action="{{ route('prompts.fork', $prompt) }}" method="POST">

@@ -21,7 +21,7 @@ class PromptController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('content', 'like', "%{$search}%");
+                  ->orWhere('prompt_text', 'like', "%{$search}%");
             });
         }
 
@@ -53,17 +53,38 @@ class PromptController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'prompt_text' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
-
+            'description' => 'nullable|string',
+            'language' => 'nullable|string|max:10',
+            'tone' => 'nullable|string|max:50',
+            'usage_type' => 'nullable|string|max:50',
+            'is_template' => 'nullable|boolean',
+            'variables_schema' => 'nullable|array',
+            'example_input' => 'nullable|array',
+            'example_output' => 'nullable|string',
+            'source' => 'nullable|string|max:255',
+            'visibility' => 'nullable|string|in:public,private',
+            'is_favorite' => 'nullable|boolean',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
         ]);
 
         $prompt = $request->user()->prompts()->create([
             'title' => $validated['title'],
-            'content' => $validated['content'],
+            'prompt_text' => $validated['prompt_text'],
             'category_id' => $validated['category_id'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'language' => $validated['language'] ?? 'en',
+            'tone' => $validated['tone'] ?? null,
+            'usage_type' => $validated['usage_type'] ?? null,
+            'is_template' => $validated['is_template'] ?? false,
+            'variables_schema' => $validated['variables_schema'] ?? null,
+            'example_input' => $validated['example_input'] ?? null,
+            'example_output' => $validated['example_output'] ?? null,
+            'source' => $validated['source'] ?? null,
+            'visibility' => $validated['visibility'] ?? 'private',
+            'is_favorite' => $validated['is_favorite'] ?? false,
         ]);
 
 
@@ -94,18 +115,32 @@ class PromptController extends Controller
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'content' => 'sometimes|required|string',
+            'prompt_text' => 'sometimes|required|string',
             'category_id' => 'nullable|exists:categories,id',
-
+            'description' => 'nullable|string',
+            'language' => 'nullable|string|max:10',
+            'tone' => 'nullable|string|max:50',
+            'usage_type' => 'nullable|string|max:50',
+            'is_template' => 'nullable|boolean',
+            'variables_schema' => 'nullable|array',
+            'example_input' => 'nullable|array',
+            'example_output' => 'nullable|string',
+            'source' => 'nullable|string|max:255',
+            'visibility' => 'nullable|string|in:public,private',
+            'is_favorite' => 'nullable|boolean',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
         ]);
 
-        $prompt->update([
-            'title' => $validated['title'] ?? $prompt->title,
-            'content' => $validated['content'] ?? $prompt->content,
-            'category_id' => $validated['category_id'] ?? $prompt->category_id,
-        ]);
+        $prompt->update(array_merge(
+            $request->only([
+                'title', 'prompt_text', 'category_id', 'description', 
+                'language', 'tone', 'usage_type', 'is_template', 
+                'variables_schema', 'example_input', 'example_output', 
+                'source', 'visibility', 'is_favorite'
+            ]),
+            ['prompt_text' => $validated['prompt_text'] ?? $prompt->prompt_text]
+        ));
 
 
 

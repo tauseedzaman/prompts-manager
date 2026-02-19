@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="popup-body">
+    <div class="container">
+        <header>
+            <h1>Prompt Manager</h1>
+            <button id="settingsBtn" title="Settings">⚙️</button>
+        </header>
+
+        <main id="mainView">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search prompts...">
+            </div>
+            <div id="promptsList" class="prompts-list">
+                <p class="empty-msg">Loading prompts...</p>
+            </div>
+        </main>
+
+        <section id="settingsView" class="hidden">
+            <h2>Settings</h2>
+            <div class="form-group">
+                <label for="apiUrl">API URL</label>
+                <input type="text" id="apiUrl" placeholder="http://localhost:8000/api">
+            </div>
+            <div class="form-group">
+                <label for="apiToken">Personal Access Token</label>
+                <input type="password" id="apiToken" placeholder="Enter your token">
+            </div>
+            <div class="actions">
+                <button id="saveSettings" class="btn-primary">Save Settings</button>
+                <button id="backBtn" class="btn-secondary">Back</button>
+            </div>
+        </section>
+
+        <footer>
+            <a href="http://localhost:8000" target="_blank" id="dashboardLink">Open Dashboard</a>
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

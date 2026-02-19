@@ -55,11 +55,51 @@
                 </div>
             @endif
 
-            <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700 relative group">
-                <button onclick="copyToClipboard(document.getElementById('marketplace-prompt-text').innerText)" class="absolute top-4 right-4 p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i class="fas fa-copy"></i>
-                </button>
-                <pre id="marketplace-prompt-text" class="whitespace-pre-wrap font-sans text-main">{{ $prompt->prompt_text }}</pre>
+            <div x-data="{
+                promptText: @js($prompt->prompt_text),
+                variables: @js($prompt->variables_schema ?? []),
+                values: {},
+                get rendered() {
+                    let text = this.promptText;
+                    this.variables.forEach(v => {
+                        const val = this.values[v] || '{{' + v + '}}';
+                        text = text.replaceAll('{{' + v + '}}', val);
+                    });
+                    return text;
+                },
+                copyRendered() {
+                    copyToClipboard(this.rendered);
+                }
+            }" x-init="variables.forEach(v => values[v] = '')">
+
+                <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700 relative group mb-6">
+                    <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button @click="copyRendered()" class="p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 hover:text-blue-500 transition-colors" title="Copy rendered prompt">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button @click="Swal.fire('Playground', 'Playground feature coming soon!', 'info')" class="p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 hover:text-green-500 transition-colors" title="Run in playground">
+                            <i class="fas fa-play text-xs"></i>
+                        </button>
+                    </div>
+                    <pre id="marketplace-prompt-text" x-text="rendered" class="whitespace-pre-wrap font-sans text-main font-medium"></pre>
+                </div>
+
+                <template x-if="variables.length > 0">
+                    <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/10 rounded-xl border border-gray-100 dark:border-gray-800/50">
+                        <h3 class="text-sm font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
+                            <i class="fas fa-sliders-h text-blue-500"></i>
+                            Fill variables
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <template x-for="variable in variables" :key="variable">
+                                <div class="form-group mb-0">
+                                    <label :for="'v-' + variable" class="form-label font-semibold text-xs mb-2 block text-gray-500 uppercase tracking-tight" x-text="variable"></label>
+                                    <input type="text" :id="'v-' + variable" x-model="values[variable]" class="form-control focus:ring-2 focus:ring-blue-500/20 transition-all" :placeholder="'Enter ' + variable + '...'">
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <div class="mt-8">

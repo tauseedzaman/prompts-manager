@@ -81,6 +81,11 @@ class PromptController extends Controller
         $validated['slug'] = Str::slug($validated['title']);
         $validated['status'] = 'published';
 
+        // Extract variables
+        $variables = $this->extractVariables($validated['prompt_text']);
+        $validated['variables_schema'] = $variables;
+        $validated['is_template'] = !empty($variables);
+
         $prompt = Prompt::create($validated);
 
         if ($request->has('tags')) {
@@ -148,6 +153,11 @@ class PromptController extends Controller
         if ($prompt->title !== $validated['title']) {
             $validated['slug'] = Str::slug($validated['title']);
         }
+
+        // Extract variables
+        $variables = $this->extractVariables($validated['prompt_text']);
+        $validated['variables_schema'] = $variables;
+        $validated['is_template'] = !empty($variables);
 
         // Save version before update
         PromptVersion::create([
@@ -412,5 +422,11 @@ class PromptController extends Controller
         }
 
         return redirect()->route('prompts.index')->with('success', "Successfully imported {$importCount} prompts.");
+    }
+
+    private function extractVariables($text)
+    {
+        preg_match_all('/\{\{(.+?)\}\}/', $text, $matches);
+        return array_values(array_unique($matches[1] ?? []));
     }
 }
