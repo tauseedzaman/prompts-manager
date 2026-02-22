@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const apiTokenInput = document.getElementById('apiToken');
     const promptsList = document.getElementById('promptsList');
     const searchInput = document.getElementById('searchInput');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    let currentTab = 'prompts';
 
     // Load settings
     const settings = await chrome.storage.local.get(['apiUrl', 'apiToken']);
@@ -21,6 +23,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         fetchPrompts();
     }
+
+    // Tab switching
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTab = btn.dataset.tab;
+            fetchPrompts(searchInput.value);
+        });
+    });
 
     // Toggle views
     settingsBtn.addEventListener('click', showSettings);
@@ -64,21 +76,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         promptsList.innerHTML = '<p class="empty-msg">Loading...</p>';
 
         try {
-            const apiUrlBase = getApiUrl(apiUrl);
-            const url = new URL(`${apiUrlBase}prompts`);
-            if (search) url.searchParams.append('search', search);
+            const payload = { search };
+            if (currentTab === 'favorites') payload.is_favorite = true;
+            if (currentTab === 'marketplace') payload.marketplace = true;
 
-            const response = await fetch(url.toString(), {
-                headers: {
-                    'Authorization': `Bearer ${apiToken}`,
-                    'Accept': 'application/json'
-                }
+            const response = await chrome.runtime.sendMessage({
+                type: 'FETCH_PROMPTS',
+                payload
             });
 
-            if (!response.ok) throw new Error('Failed to fetch prompts');
+            if (response.error) throw new Error(response.error);
 
-            const data = await response.json();
-            displayPrompts(data.data || data); // Laravel pagination returns .data
+            displayPrompts(response.data);
         } catch (error) {
             promptsList.innerHTML = `<p class="empty-msg" style="color: #ef4444;">Error: ${error.message}</p>`;
         }
@@ -95,16 +104,54 @@ document.addEventListener('DOMContentLoaded', async () => {
             const div = document.createElement('div');
             div.className = 'prompt-item';
             div.innerHTML = `
-                <span class="prompt-title">${prompt.title}</span>
-                <span class="prompt-desc">${prompt.description || prompt.prompt_text}</span>
+                <div class="prompt-content">
+                    <span class="prompt-title">${prompt.title}</span>
+                    <span class="prompt-desc">${prompt.description || prompt.prompt_text}</span>
+                </div>
+                ${currentTab !== 'marketplace' ? `
+                <button class="delete-btn" title="Delete Prompt" data-id="${prompt.id}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+                </button>` : ''}
             `;
-            div.addEventListener('click', () => {
+
+            // Click content to copy
+            div.querySelector('.prompt-content').addEventListener('click', (e) => {
                 copyToClipboard(prompt.prompt_text);
                 const title = div.querySelector('.prompt-title');
                 const originalText = title.textContent;
                 title.textContent = '✅ Copied!';
-                setTimeout(() => title.textContent = originalText, 1500);
+                title.classList.add('copied');
+                setTimeout(() => {
+                    title.textContent = originalText;
+                    title.classList.remove('copied');
+                }, 1500);
             });
+
+            // Delete functionality
+            const delBtn = div.querySelector('.delete-btn');
+            if (delBtn) {
+                delBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (!confirm('Are you sure you want to delete this prompt?')) return;
+
+                    delBtn.disabled = true;
+                    const response = await chrome.runtime.sendMessage({
+                        type: 'DELETE_PROMPT',
+                        payload: { id: prompt.id }
+                    });
+
+                    if (response.success) {
+                        div.remove();
+                        if (promptsList.children.length === 0) {
+                            promptsList.innerHTML = '<p class="empty-msg">No prompts found.</p>';
+                        }
+                    } else {
+                        alert('Delete failed: ' + response.error);
+                        delBtn.disabled = false;
+                    }
+                });
+            }
+
             promptsList.appendChild(div);
         });
     }

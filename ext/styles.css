@@ -55,7 +55,36 @@ h2 {
 }
 
 .search-box {
+    margin-bottom: 0.5rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.25rem;
     margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.25rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn:hover {
+    color: var(--text-color);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
 }
 
 input {
@@ -88,11 +117,49 @@ input:focus {
     border: 1px solid var(--border-color);
     cursor: pointer;
     transition: transform 0.1s, background-color 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.prompt-content {
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .prompt-item:hover {
     background-color: #334155;
     transform: translateY(-2px);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0;
+}
+
+.prompt-item:hover .delete-btn {
+    opacity: 1;
+}
+
+.delete-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.prompt-title.copied {
+    color: #10b981;
 }
 
 .prompt-title {
@@ -245,7 +312,36 @@ footer a:hover {
 }
 
 .pm-sidebar-search input {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.pm-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 2px;
+}
+
+.pm-tab-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.pm-tab-btn:hover {
+    color: #f8fafc;
+}
+
+.pm-tab-btn.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
 }
 
 .pm-list {
@@ -260,10 +356,39 @@ footer a:hover {
     margin-bottom: 0.5rem;
     cursor: pointer;
     border: 1px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pm-item-content {
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .pm-item:hover {
     background: #334155;
+}
+
+.pm-delete-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+
+.pm-item:hover .pm-delete-btn {
+    opacity: 1;
+}
+
+.pm-delete-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
 }
 
 .pm-item-title {
@@ -291,6 +416,17 @@ footer a:hover {
 .pm-save-btn:hover {
     background: #6366f1;
     color: white;
+}
+
+.pm-save-btn.pm-saved {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.pm-save-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 .pm-error {

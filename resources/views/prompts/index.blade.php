@@ -74,7 +74,18 @@
                         <button onclick="copyToClipboard(`{{ addslashes($prompt->prompt_text) }}`)" class="btn btn-secondary btn-sm">
                             Copy
                         </button>
-                         <a href="{{ route('prompts.edit', $prompt) }}" class="text-muted text-sm hover:text-blue-500">Edit</a>
+                         <div class="flex items-center gap-3">
+                            <a href="{{ route('prompts.edit', $prompt) }}" class="text-muted text-sm hover:text-blue-500" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form id="delete-form-{{ $prompt->id }}" action="{{ route('prompts.destroy', $prompt) }}" method="POST" class="hidden">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                            <button type="button" onclick="deletePrompt('{{ $prompt->id }}')" class="text-muted text-sm hover:text-red-500" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                         </div>
                     </div>
                 </div>
                 @endforeach
@@ -95,6 +106,22 @@
 
 @push('scripts')
 <script>
+    function deletePrompt(promptId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(`delete-form-${promptId}`).submit();
+            }
+        });
+    }
+
     function toggleFavorite(promptId, btn) {
         fetch(`/prompts/${promptId}/toggle-favorite`, {
             method: 'POST',

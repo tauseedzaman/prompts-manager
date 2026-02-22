@@ -21,7 +21,8 @@ class PromptController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('prompt_text', 'like', "%{$search}%");
+                  ->orWhere('prompt_text', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -30,13 +31,16 @@ class PromptController extends Controller
             $query->where('category_id', $request->input('category_id'));
         }
 
-
-
         // Filter by tag
         if ($request->has('tag_id')) {
             $query->whereHas('tags', function ($q) use ($request) {
                 $q->where('tags.id', $request->input('tag_id'));
             });
+        }
+
+        // Filter by favorites
+        if ($request->has('is_favorite')) {
+            $query->where('is_favorite', $request->boolean('is_favorite'));
         }
 
         $prompts = $query->with(['category', 'tags'])
@@ -55,6 +59,7 @@ class PromptController extends Controller
             'title' => 'required|string|max:255',
             'prompt_text' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
+            'category_name' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'language' => 'nullable|string|max:10',
             'tone' => 'nullable|string|max:50',
@@ -68,18 +73,42 @@ class PromptController extends Controller
             'is_favorite' => 'nullable|boolean',
             'tag_ids' => 'nullable|array',
             'tag_ids.*' => 'exists:tags,id',
+            'tag_names' => 'nullable|array',
+            'tag_names.*' => 'string|max:50',
         ]);
+
+        $categoryId = $validated['category_id'] ?? null;
+        
+        // Handle auto-creation of category
+        if (!$categoryId && !empty($validated['category_name'])) {
+            $category = $request->user()->categories()->firstOrCreate(
+                ['name' => $validated['category_name']],
+                ['slug' => \Illuminate\Support\Str::slug($validated['category_name'])]
+            );
+            $categoryId = $category->id;
+        }
+
+        $slug = \Illuminate\Support\Str::slug($validated['title']);
+        $baseSlug = $slug;
+        $count = 1;
+        while ($request->user()->prompts()->where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $count++;
+        }
+
+        // Extract variables
+        $variables = $this->extractVariables($validated['prompt_text']);
 
         $prompt = $request->user()->prompts()->create([
             'title' => $validated['title'],
+            'slug' => $slug,
             'prompt_text' => $validated['prompt_text'],
-            'category_id' => $validated['category_id'] ?? null,
+            'category_id' => $categoryId,
             'description' => $validated['description'] ?? null,
             'language' => $validated['language'] ?? 'en',
             'tone' => $validated['tone'] ?? null,
             'usage_type' => $validated['usage_type'] ?? null,
-            'is_template' => $validated['is_template'] ?? false,
-            'variables_schema' => $validated['variables_schema'] ?? null,
+            'is_template' => $validated['is_template'] ?? !empty($variables),
+            'variables_schema' => $validated['variables_schema'] ?? $variables,
             'example_input' => $validated['example_input'] ?? null,
             'example_output' => $validated['example_output'] ?? null,
             'source' => $validated['source'] ?? null,
@@ -87,11 +116,22 @@ class PromptController extends Controller
             'is_favorite' => $validated['is_favorite'] ?? false,
         ]);
 
-
-
-        // Attach tags
+        // Attach tags by ID
         if (!empty($validated['tag_ids'])) {
             $prompt->tags()->attach($validated['tag_ids']);
+        }
+
+        // Attach tags by Name (auto-create)
+        if (!empty($validated['tag_names'])) {
+            $tagIds = [];
+            foreach ($validated['tag_names'] as $tagName) {
+                $tag = $request->user()->tags()->firstOrCreate(
+                    ['name' => $tagName],
+                    ['slug' => \Illuminate\Support\Str::slug($tagName)]
+                );
+                $tagIds[] = $tag->id;
+            }
+            $prompt->tags()->syncWithoutDetaching($tagIds);
         }
 
         return response()->json($prompt->load(['category', 'tags']), 201);
@@ -161,5 +201,11 @@ class PromptController extends Controller
         $prompt->delete();
 
         return response()->json(['message' => 'Prompt deleted successfully'], 200);
+    }
+
+    private function extractVariables($text)
+    {
+        preg_match_all('/\{\{(.+?)\}\}/', $text, $matches);
+        return array_values(array_unique($matches[1] ?? []));
     }
 }

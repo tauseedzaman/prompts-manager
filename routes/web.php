@@ -18,7 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/prompts/import', [\App\Http\Controllers\PromptController::class, 'importPage'])->name('prompts.import-page');
     Route::post('/prompts/import', [\App\Http\Controllers\PromptController::class, 'import'])->name('prompts.import');
     Route::get('/prompts/sample', [\App\Http\Controllers\PromptController::class, 'downloadSample'])->name('prompts.sample');
-    
+
     // Auth-only Marketplace Routes
     Route::post('/marketplace/{prompt}/rate', [\App\Http\Controllers\MarketplaceController::class, 'rate'])->name('marketplace.rate');
     Route::post('/prompts/{prompt}/fork', [\App\Http\Controllers\PromptController::class, 'fork'])->name('prompts.fork');

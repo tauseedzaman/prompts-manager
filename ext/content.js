@@ -16,6 +16,7 @@ function injectUI() {
 }
 
 let sidebar = null;
+let currentTab = 'prompts';
 
 function toggleSidebar() {
     if (sidebar) {
@@ -34,6 +35,11 @@ function toggleSidebar() {
         <div class="pm-sidebar-search">
             <input type="text" id="pm-search" placeholder="Search prompts...">
         </div>
+        <div class="pm-tabs">
+            <button class="pm-tab-btn active" data-tab="prompts">My</button>
+            <button class="pm-tab-btn" data-tab="favorites">Favs</button>
+            <button class="pm-tab-btn" data-tab="marketplace">Store</button>
+        </div>
         <div id="pm-list" class="pm-list">
             <p>Loading...</p>
         </div>
@@ -50,6 +56,16 @@ function toggleSidebar() {
         loadPrompts(searchInput.value);
     }, 300);
 
+    const tabBtns = sidebar.querySelectorAll('.pm-tab-btn');
+    tabBtns.forEach(btn => {
+        btn.onclick = () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTab = btn.dataset.tab;
+            loadPrompts(searchInput.value);
+        };
+    });
+
     loadPrompts();
 }
 
@@ -57,9 +73,13 @@ async function loadPrompts(search = '') {
     const list = document.getElementById('pm-list');
     if (!list) return;
 
+    const payload = { search };
+    if (currentTab === 'favorites') payload.is_favorite = true;
+    if (currentTab === 'marketplace') payload.marketplace = true;
+
     const response = await chrome.runtime.sendMessage({
         type: 'FETCH_PROMPTS',
-        payload: { search }
+        payload
     });
 
     if (response.error) {
@@ -78,10 +98,42 @@ async function loadPrompts(search = '') {
         const item = document.createElement('div');
         item.className = 'pm-item';
         item.innerHTML = `
-            <div class="pm-item-title">${prompt.title}</div>
-            <div class="pm-item-text">${prompt.description || truncate(prompt.prompt_text)}</div>
+            <div class="pm-item-content">
+                <div class="pm-item-title">${prompt.title}</div>
+                <div class="pm-item-text">${prompt.description || truncate(prompt.prompt_text)}</div>
+            </div>
+            ${currentTab !== 'marketplace' ? `
+            <button class="pm-delete-btn" title="Delete Prompt">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+            </button>` : ''}
         `;
-        item.onclick = () => usePrompt(prompt.prompt_text);
+
+        item.querySelector('.pm-item-content').onclick = () => usePrompt(prompt.prompt_text);
+
+        const delBtn = item.querySelector('.pm-delete-btn');
+        if (delBtn) {
+            delBtn.onclick = async (e) => {
+                e.stopPropagation();
+                if (!confirm('Are you sure you want to delete this prompt?')) return;
+
+                delBtn.disabled = true;
+                const response = await chrome.runtime.sendMessage({
+                    type: 'DELETE_PROMPT',
+                    payload: { id: prompt.id }
+                });
+
+                if (response.success) {
+                    item.remove();
+                    if (list.children.length === 0) {
+                        list.innerHTML = '<p>No prompts found.</p>';
+                    }
+                } else {
+                    alert('Delete failed: ' + response.error);
+                    delBtn.disabled = false;
+                }
+            };
+        }
+
         list.appendChild(item);
     });
 }
@@ -152,18 +204,38 @@ async function saveMessageToPrompts(msgElement) {
     const textElement = msgElement.querySelector('.markdown') || msgElement.querySelector('.whitespace-pre-wrap');
     if (!textElement) return;
 
+    const btn = msgElement.querySelector('.pm-save-btn');
+    const originalText = btn.textContent;
+    btn.textContent = '⏳ Saving...';
+    btn.disabled = true;
+
     const text = textElement.innerText;
+    // Extract first 5 words for title
+    const words = text.trim().split(/\s+/).slice(0, 5).join(' ');
+    const title = words + (text.split(/\s+/).length > 5 ? '...' : '');
+
     const response = await chrome.runtime.sendMessage({
         type: 'SAVE_PROMPT',
-        payload: { text }
+        payload: {
+            text,
+            title,
+            category_name: 'ChatGPT',
+            tag_names: ['ChatGPT']
+        }
     });
 
     if (response.error) {
         alert('Error: ' + response.error);
+        btn.textContent = originalText;
+        btn.disabled = false;
     } else {
-        const btn = msgElement.querySelector('.pm-save-btn');
         btn.textContent = '✅ Saved!';
-        setTimeout(() => btn.textContent = '💾 Save to prompts', 2000);
+        btn.classList.add('pm-saved');
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('pm-saved');
+            btn.disabled = false;
+        }, 2000);
     }
 }
 
