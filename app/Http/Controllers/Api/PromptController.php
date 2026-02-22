@@ -43,8 +43,14 @@ class PromptController extends Controller
             $query->where('is_favorite', $request->boolean('is_favorite'));
         }
 
+        // Sorting
+        if ($request->input('sort') === 'most_used') {
+            $query->mostUsed();
+        } else {
+            $query->latest();
+        }
+
         $prompts = $query->with(['category', 'tags'])
-                         ->latest()
                          ->paginate($request->input('per_page', 15));
 
         return response()->json($prompts);
@@ -201,6 +207,23 @@ class PromptController extends Controller
         $prompt->delete();
 
         return response()->json(['message' => 'Prompt deleted successfully'], 200);
+    }
+
+    public function incrementUsage(Request $request, string $id)
+    {
+        $prompt = Prompt::findOrFail($id);
+        
+        // Allowed if owner or if it's public
+        if ($prompt->user_id !== $request->user()->id && $prompt->visibility !== 'public') {
+            abort(403);
+        }
+
+        $prompt->increment('usage_count');
+
+        return response()->json([
+            'message' => 'Usage incremented',
+            'usage_count' => $prompt->usage_count
+        ]);
     }
 
     private function extractVariables($text)

@@ -8,6 +8,26 @@
     <a href="{{ route('categories.create') }}" class="btn btn-primary">+ New Category</a>
 </div>
 
+@if(count($suggestions) > 0)
+<div class="card mb-6 bg-slate-50 dark:bg-white/5 border-dashed">
+    <h3 class="text-sm font-bold uppercase text-muted mb-3">Suggested Categories</h3>
+    <div class="flex flex-wrap gap-3">
+        @foreach($suggestions as $suggestion)
+        <form action="{{ route('categories.store-suggestion') }}" method="POST">
+            @csrf
+            <input type="hidden" name="name" value="{{ $suggestion['name'] }}">
+            <input type="hidden" name="color" value="{{ $suggestion['color'] }}">
+            <input type="hidden" name="icon" value="{{ $suggestion['icon'] }}">
+            <button type="submit" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105" style="background-color: {{ $suggestion['color'] }}20; color: {{ $suggestion['color'] }}; border: 1px solid {{ $suggestion['color'] }}40;">
+                <i class="{{ $suggestion['icon'] }}"></i>
+                {{ $suggestion['name'] }}
+            </button>
+        </form>
+        @endforeach
+    </div>
+</div>
+@endif
+
 <div class="card">
     <table style="width: 100%; border-collapse: collapse;">
         <thead>

@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const promptsList = document.getElementById('promptsList');
     const searchInput = document.getElementById('searchInput');
     const tabBtns = document.querySelectorAll('.tab-btn');
+    const sortSelect = document.getElementById('sortSelect');
+    const workspaceSelect = document.getElementById('workspaceSelect');
     let currentTab = 'prompts';
 
     // Load settings
@@ -21,7 +23,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!settings.apiUrl || !settings.apiToken) {
         showSettings();
     } else {
-        fetchPrompts();
+        fetchWorkspaces();
+        const { lastWorkspace } = await chrome.storage.local.get('lastWorkspace');
+        if (lastWorkspace) workspaceSelect.value = lastWorkspace;
+        fetchPrompts(searchInput.value, sortSelect.value, workspaceSelect.value);
     }
 
     // Tab switching
@@ -30,8 +35,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentTab = btn.dataset.tab;
-            fetchPrompts(searchInput.value);
+            fetchPrompts(searchInput.value, sortSelect.value);
         });
+    });
+
+    sortSelect.addEventListener('change', () => {
+        fetchPrompts(searchInput.value, sortSelect.value, workspaceSelect.value);
+    });
+
+    workspaceSelect.addEventListener('change', async () => {
+        const wsId = workspaceSelect.value;
+        await chrome.storage.local.set({ lastWorkspace: wsId });
+        fetchPrompts(searchInput.value, sortSelect.value, wsId);
     });
 
     // Toggle views
@@ -66,10 +81,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Search prompts
     searchInput.addEventListener('input', debounce(() => {
-        fetchPrompts(searchInput.value);
+        fetchPrompts(searchInput.value, sortSelect.value, workspaceSelect.value);
     }, 300));
 
-    async function fetchPrompts(search = '') {
+    async function fetchPrompts(search = '', sort = 'latest', workspace_id = '') {
         const { apiUrl, apiToken } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
         if (!apiUrl || !apiToken) return;
 
@@ -79,6 +94,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const payload = { search };
             if (currentTab === 'favorites') payload.is_favorite = true;
             if (currentTab === 'marketplace') payload.marketplace = true;
+            payload.sort = sort;
+            if (workspace_id) payload.workspace_id = workspace_id;
 
             const response = await chrome.runtime.sendMessage({
                 type: 'FETCH_PROMPTS',
@@ -90,6 +107,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             displayPrompts(response.data);
         } catch (error) {
             promptsList.innerHTML = `<p class="empty-msg" style="color: #ef4444;">Error: ${error.message}</p>`;
+        }
+    }
+
+    async function fetchWorkspaces() {
+        try {
+            const response = await chrome.runtime.sendMessage({ type: 'FETCH_WORKSPACES' });
+            if (response.error) throw new Error(response.error);
+
+            const { workspaces } = response;
+            // Clear but keep "Private Library"
+            workspaceSelect.innerHTML = '<option value="">Private Library</option>';
+            workspaces.forEach(ws => {
+                const opt = document.createElement('option');
+                opt.value = ws.id;
+                opt.textContent = ws.name;
+                workspaceSelect.appendChild(opt);
+            });
+
+            // Re-apply selection if possible
+            const { lastWorkspace } = await chrome.storage.local.get('lastWorkspace');
+            if (lastWorkspace) workspaceSelect.value = lastWorkspace;
+        } catch (error) {
+            console.error('Failed to fetch workspaces:', error);
         }
     }
 
@@ -117,6 +157,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Click content to copy
             div.querySelector('.prompt-content').addEventListener('click', (e) => {
                 copyToClipboard(prompt.prompt_text);
+
+                // Track usage
+                chrome.runtime.sendMessage({
+                    type: 'INCREMENT_USAGE',
+                    payload: { id: prompt.id }
+                });
+
                 const title = div.querySelector('.prompt-title');
                 const originalText = title.textContent;
                 title.textContent = '✅ Copied!';

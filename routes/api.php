@@ -24,7 +24,11 @@ Route::middleware('auth:sanctum')->name('api.')->group(function () {
     Route::get('/marketplace', [\App\Http\Controllers\Api\MarketplaceController::class, 'index'])->name('marketplace.index');
 
     // Prompts
+    Route::post('prompts/{prompt}/increment-usage', [\App\Http\Controllers\Api\PromptController::class, 'incrementUsage'])->name('prompts.usage');
     Route::apiResource('prompts', \App\Http\Controllers\Api\PromptController::class);
+    
+    // Workspaces
+    Route::apiResource('workspaces', \App\Http\Controllers\Api\WorkspaceController::class);
     
     // Categories
     Route::apiResource('categories', \App\Http\Controllers\Api\CategoryController::class);

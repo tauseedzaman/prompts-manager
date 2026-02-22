@@ -25,7 +25,13 @@ class MarketplaceController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $prompts = $query->latest()->paginate($request->input('per_page', 12));
+        if ($request->input('sort') === 'most_used') {
+            $query->mostUsed();
+        } else {
+            $query->latest();
+        }
+
+        $prompts = $query->paginate($request->input('per_page', 12));
 
         return response()->json($prompts);
     }

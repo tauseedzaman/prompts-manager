@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompt Manager</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="popup-body">
     <div class="container">
         <header>
@@ -16,6 +18,15 @@
         <main id="mainView">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search prompts...">
+            </div>
+            <div class="filter-bar">
+                <select id="workspaceSelect" class="w-full">
+                    <option value="">Private Library</option>
+                </select>
+                <select id="sortSelect">
+                    <option value="latest">Latest</option>
+                    <option value="most_used">Most Used</option>
+                </select>
             </div>
             <div class="tabs">
                 <button class="tab-btn active" data-tab="prompts">My Prompts</button>
@@ -49,4 +60,5 @@
     </div>
     <script src="popup.js"></script>
 </body>
+
 </html>

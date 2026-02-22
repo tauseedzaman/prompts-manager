@@ -18,7 +18,7 @@ function injectUI() {
 let sidebar = null;
 let currentTab = 'prompts';
 
-function toggleSidebar() {
+async function toggleSidebar() {
     if (sidebar) {
         sidebar.remove();
         sidebar = null;
@@ -34,6 +34,15 @@ function toggleSidebar() {
         </div>
         <div class="pm-sidebar-search">
             <input type="text" id="pm-search" placeholder="Search prompts...">
+        </div>
+        <div class="pm-filter-bar">
+            <select id="pm-workspace" class="w-full">
+                <option value="">Private Library</option>
+            </select>
+            <select id="pm-sort">
+                <option value="latest">Latest</option>
+                <option value="most_used">Most Used</option>
+            </select>
         </div>
         <div class="pm-tabs">
             <button class="pm-tab-btn active" data-tab="prompts">My</button>
@@ -56,26 +65,63 @@ function toggleSidebar() {
         loadPrompts(searchInput.value);
     }, 300);
 
+    const sortSelect = sidebar.querySelector('#pm-sort');
+    sortSelect.onchange = () => loadPrompts(searchInput.value, sortSelect.value);
+
+    const workspaceSelect = sidebar.querySelector('#pm-workspace');
+    workspaceSelect.onchange = async () => {
+        await chrome.storage.local.set({ lastWorkspace: workspaceSelect.value });
+        loadPrompts(searchInput.value, sortSelect.value, workspaceSelect.value);
+    };
+
     const tabBtns = sidebar.querySelectorAll('.pm-tab-btn');
     tabBtns.forEach(btn => {
         btn.onclick = () => {
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentTab = btn.dataset.tab;
-            loadPrompts(searchInput.value);
+            loadPrompts(searchInput.value, sortSelect.value, workspaceSelect.value);
         };
     });
 
-    loadPrompts();
+    loadWorkspaces(workspaceSelect);
+
+    const { lastWorkspace } = await chrome.storage.local.get('lastWorkspace');
+    if (lastWorkspace) workspaceSelect.value = lastWorkspace;
+
+    loadPrompts(searchInput.value, sortSelect.value, workspaceSelect.value);
 }
 
-async function loadPrompts(search = '') {
+async function loadWorkspaces(selectElement) {
+    try {
+        const response = await chrome.runtime.sendMessage({ type: 'FETCH_WORKSPACES' });
+        if (response.error) throw new Error(response.error);
+
+        const { workspaces } = response;
+        selectElement.innerHTML = '<option value="">Private Library</option>';
+        workspaces.forEach(ws => {
+            const opt = document.createElement('option');
+            opt.value = ws.id;
+            opt.textContent = ws.name;
+            selectElement.appendChild(opt);
+        });
+
+        const { lastWorkspace } = await chrome.storage.local.get('lastWorkspace');
+        if (lastWorkspace) selectElement.value = lastWorkspace;
+    } catch (error) {
+        console.error('Failed to load workspaces in sidebar:', error);
+    }
+}
+
+async function loadPrompts(search = '', sort = 'latest', workspace_id = '') {
     const list = document.getElementById('pm-list');
     if (!list) return;
 
     const payload = { search };
     if (currentTab === 'favorites') payload.is_favorite = true;
     if (currentTab === 'marketplace') payload.marketplace = true;
+    payload.sort = sort;
+    if (workspace_id) payload.workspace_id = workspace_id;
 
     const response = await chrome.runtime.sendMessage({
         type: 'FETCH_PROMPTS',
@@ -108,7 +154,14 @@ async function loadPrompts(search = '') {
             </button>` : ''}
         `;
 
-        item.querySelector('.pm-item-content').onclick = () => usePrompt(prompt.prompt_text);
+        item.querySelector('.pm-item-content').onclick = () => {
+            usePrompt(prompt.prompt_text);
+            // Track usage
+            chrome.runtime.sendMessage({
+                type: 'INCREMENT_USAGE',
+                payload: { id: prompt.id }
+            });
+        };
 
         const delBtn = item.querySelector('.pm-delete-btn');
         if (delBtn) {

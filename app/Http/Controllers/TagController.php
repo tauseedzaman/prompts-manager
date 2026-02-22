@@ -14,7 +14,45 @@ class TagController extends Controller
     public function index()
     {
         $tags = Tag::where('user_id', auth()->id())->get();
-        return view('tags.index', compact('tags'));
+
+        $allSuggestions = [
+            ['name' => 'chatgpt', 'color' => '#10b981'],
+            ['name' => 'openai', 'color' => '#3b82f6'],
+            ['name' => 'claude', 'color' => '#8b5cf6'],
+            ['name' => 'gemini', 'color' => '#f59e0b'],
+            ['name' => 'marketing', 'color' => '#ec4899'],
+            ['name' => 'coding', 'color' => '#06b6d4'],
+            ['name' => 'content', 'color' => '#64748b'],
+            ['name' => 'research', 'color' => '#475569'],
+        ];
+
+        $existingNames = $tags->pluck('name')->map(fn($n) => strtolower($n))->toArray();
+        $suggestions = array_filter($allSuggestions, fn($s) => !in_array(strtolower($s['name']), $existingNames));
+
+        return view('tags.index', compact('tags', 'suggestions'));
+    }
+
+    /**
+     * Store a suggested resource in storage.
+     */
+    public function storeSuggestion(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'color' => 'nullable|string',
+        ]);
+
+        $validated['user_id'] = auth()->id();
+        $validated['slug'] = Str::slug($validated['name']);
+        
+        // Ensure not duplicate
+        if (Tag::where('user_id', auth()->id())->where('name', $validated['name'])->exists()) {
+            return redirect()->back()->with('error', 'Tag already exists.');
+        }
+
+        Tag::create($validated);
+
+        return redirect()->route('tags.index')->with('success', 'Tag added from suggestions.');
     }
 
     /**

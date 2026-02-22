@@ -63,6 +63,26 @@
 
                 @auth
                     <div class="nav-section">
+                        <div class="nav-section-title">Workspaces</div>
+                        
+                        <div class="px-3 mb-2">
+                             <select onchange="window.location.href='/prompts?workspace_id=' + this.value" class="w-full bg-[#1e293b] border-none text-xs text-muted rounded-lg focus:ring-1 focus:ring-indigo-500 py-2">
+                                <option value="">Private Library</option>
+                                @foreach(auth()->user()->allWorkspaces() as $ws)
+                                    <option value="{{ $ws->id }}" {{ request('workspace_id') == $ws->id ? 'selected' : '' }}>
+                                        {{ $ws->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <a href="{{ route('workspaces.index') }}" class="nav-link {{ request()->routeIs('workspaces.*') ? 'active' : '' }}">
+                            <i class="fas fa-users-cog"></i>
+                            Manage Teams
+                        </a>
+                    </div>
+
+                    <div class="nav-section">
                         <div class="nav-section-title">Library</div>
                         
                         <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">

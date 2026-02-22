@@ -11,6 +11,9 @@
 <div class="card">
     <form action="{{ route('prompts.store') }}" method="POST">
         @csrf
+        @if(request('workspace_id'))
+            <input type="hidden" name="workspace_id" value="{{ request('workspace_id') }}">
+        @endif
 
         <div class="form-group">
             <label for="title" class="form-label">Title</label>

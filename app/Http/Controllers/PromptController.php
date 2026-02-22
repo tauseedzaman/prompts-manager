@@ -16,7 +16,18 @@ class PromptController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Prompt::where('user_id', auth()->id())->with(['category', 'tags']);
+        $query = Prompt::with(['category', 'tags']);
+
+        if ($request->has('workspace_id') && !empty($request->workspace_id)) {
+            $workspaceId = $request->workspace_id;
+            // Check if user has access to this workspace
+            if (!auth()->user()->allWorkspaces()->contains('id', $workspaceId)) {
+                abort(403);
+            }
+            $query->where('workspace_id', $workspaceId);
+        } else {
+            $query->where('user_id', auth()->id())->whereNull('workspace_id');
+        }
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -36,19 +47,38 @@ class PromptController extends Controller
             });
         }
 
-        $prompts = $query->latest()->paginate(10);
+        if ($request->input('sort') === 'most_used') {
+            $query->mostUsed();
+        } else {
+            $query->latest();
+        }
+
+        $prompts = $query->paginate(10);
         $categories = Category::where('user_id', auth()->id())->get();
 
         return view('prompts.index', compact('prompts', 'categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(Request $request)
     {
-        $categories = Category::where('user_id', auth()->id())->where('is_active', true)->get();
-        $tags = Tag::where('user_id', auth()->id())->get();
+        $categoriesQuery = Category::where('is_active', true);
+        $tagsQuery = Tag::query();
+
+        if ($request->has('workspace_id') && !empty($request->workspace_id)) {
+            $workspaceId = $request->workspace_id;
+            if (!auth()->user()->allWorkspaces()->contains('id', $workspaceId)) {
+                abort(403);
+            }
+            $categoriesQuery->where('workspace_id', $workspaceId);
+            // Tags are currently global/user-based, but could be scoped too if needed.
+            $tagsQuery->where('user_id', auth()->id()); // Default for now
+        } else {
+            $categoriesQuery->where('user_id', auth()->id())->whereNull('workspace_id');
+            $tagsQuery->where('user_id', auth()->id());
+        }
+
+        $categories = $categoriesQuery->get();
+        $tags = $tagsQuery->get();
 
         return view('prompts.create', compact('categories', 'tags'));
     }
@@ -63,15 +93,15 @@ class PromptController extends Controller
                 'required',
                 'string',
                 'max:255',
-                \Illuminate\Validation\Rule::unique('prompts')->where('user_id', auth()->id()),
             ],
             'category_id' => 'required|exists:categories,id',
+            'workspace_id' => 'nullable|exists:workspaces,id',
             'prompt_text' => 'required|string',
             'description' => 'nullable|string',
             'language' => 'nullable|string',
             'tone' => 'nullable|string',
             'is_template' => 'boolean',
-            'variables_schema' => 'nullable|string', // JSON string or array
+            'variables_schema' => 'nullable|string',
             'tags' => 'array',
             'tags.*' => 'exists:tags,id',
             'visibility' => 'required|in:private,public',
@@ -100,7 +130,11 @@ class PromptController extends Controller
      */
     public function show(Prompt $prompt)
     {
-        if ($prompt->user_id !== auth()->id()) {
+        if ($prompt->workspace_id) {
+            if (!auth()->user()->allWorkspaces()->contains('id', $prompt->workspace_id)) {
+                abort(403);
+            }
+        } elseif ($prompt->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -112,10 +146,22 @@ class PromptController extends Controller
      */
     public function edit(Prompt $prompt)
     {
-        if ($prompt->user_id !== auth()->id()) {
+        if ($prompt->workspace_id) {
+            if (!auth()->user()->allWorkspaces()->contains('id', $prompt->workspace_id)) {
+                abort(403);
+            }
+        } elseif ($prompt->user_id !== auth()->id()) {
             abort(403);
         }
-        $categories = Category::where('user_id', auth()->id())->get();
+
+        $categoriesQuery = Category::query();
+        if ($prompt->workspace_id) {
+            $categoriesQuery->where('workspace_id', $prompt->workspace_id);
+        } else {
+            $categoriesQuery->where('user_id', auth()->id())->whereNull('workspace_id');
+        }
+
+        $categories = $categoriesQuery->get();
         $tags = Tag::where('user_id', auth()->id())->get();
 
         return view('prompts.edit', compact('prompt', 'categories', 'tags'));
@@ -136,18 +182,18 @@ class PromptController extends Controller
                 'max:255',
                 \Illuminate\Validation\Rule::unique('prompts')
                     ->where('user_id', auth()->id())
+                    ->where('workspace_id', $request->input('workspace_id'))
                     ->ignore($prompt->id),
             ],
             'category_id' => 'required|exists:categories,id',
+            'workspace_id' => 'nullable|exists:workspaces,id',
             'prompt_text' => 'required|string',
             'description' => 'nullable|string',
-            'language' => 'nullable|string',
-            'tone' => 'nullable|string',
-            'is_template' => 'boolean',
-            'variables_schema' => 'nullable|string',
-            'tags' => 'array',
-            'tags.*' => 'exists:tags,id',
+            'language' => 'nullable|string|max:10',
+            'tone' => 'nullable|string|max:50',
             'visibility' => 'required|in:private,public',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
 
         if ($prompt->title !== $validated['title']) {

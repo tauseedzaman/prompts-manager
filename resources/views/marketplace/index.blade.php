@@ -8,6 +8,13 @@
         <h1 class="mb-2">Prompt Marketplace</h1>
         <p class="text-muted">Discover and copy high-quality prompts from the community.</p>
     </div>
+    <div class="flex items-center gap-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-lg px-3 py-1.5">
+        <span class="text-xs text-muted font-medium">Sort by:</span>
+        <select onchange="window.location.href=this.value" class="bg-transparent text-xs border-none focus:ring-0 cursor-pointer">
+            <option value="{{ request()->fullUrlWithQuery(['sort' => 'latest']) }}" {{ request('sort') !== 'most_used' ? 'selected' : '' }}>Latest</option>
+            <option value="{{ request()->fullUrlWithQuery(['sort' => 'most_used']) }}" {{ request('sort') === 'most_used' ? 'selected' : '' }}>Most Used</option>
+        </select>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">

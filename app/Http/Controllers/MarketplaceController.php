@@ -31,7 +31,13 @@ class MarketplaceController extends Controller
             });
         }
 
-        $prompts = $query->latest()->paginate(12);
+        if ($request->input('sort') === 'most_used') {
+            $query->mostUsed();
+        } else {
+            $query->latest();
+        }
+
+        $prompts = $query->paginate(12);
         $categories = Category::whereHas('prompts', function ($q) {
             $q->public();
         })->get();

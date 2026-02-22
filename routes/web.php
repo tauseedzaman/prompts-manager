@@ -24,7 +24,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/prompts/{prompt}/fork', [\App\Http\Controllers\PromptController::class, 'fork'])->name('prompts.fork');
 
     Route::resource('prompts', \App\Http\Controllers\PromptController::class);
+    
+    Route::post('/categories/suggestion', [\App\Http\Controllers\CategoryController::class, 'storeSuggestion'])->name('categories.store-suggestion');
     Route::resource('categories', \App\Http\Controllers\CategoryController::class);
+    
+    Route::post('/tags/suggestion', [\App\Http\Controllers\TagController::class, 'storeSuggestion'])->name('tags.store-suggestion');
     Route::resource('tags', \App\Http\Controllers\TagController::class);
     Route::post('/prompts/{prompt}/copy', [\App\Http\Controllers\PromptController::class, 'copy'])->name('prompts.copy');
     Route::post('/prompts/{prompt}/toggle-favorite', [\App\Http\Controllers\PromptController::class, 'toggleFavorite'])->name('prompts.toggle-favorite');
@@ -42,6 +46,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/api-tokens', [\App\Http\Controllers\ApiTokenController::class, 'index'])->name('api-tokens.index');
     Route::post('/profile/api-tokens', [\App\Http\Controllers\ApiTokenController::class, 'store'])->name('api-tokens.store');
     Route::delete('/profile/api-tokens/{tokenId}', [\App\Http\Controllers\ApiTokenController::class, 'destroy'])->name('api-tokens.destroy');
+
+    // Workspaces
+    Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
+    Route::post('/workspaces/{workspace}/members', [\App\Http\Controllers\WorkspaceController::class, 'addMember'])->name('workspaces.members.store');
+    Route::delete('/workspaces/{workspace}/members/{user}', [\App\Http\Controllers\WorkspaceController::class, 'removeMember'])->name('workspaces.members.destroy');
 });
 
 require __DIR__.'/auth.php';

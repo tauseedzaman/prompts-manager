@@ -52,6 +52,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; // Keep channel open for async
     }
 
+    if (request.type === 'INCREMENT_USAGE') {
+        handleIncrementUsage(request.payload.id).then(sendResponse);
+        return true;
+    }
+
+    if (request.type === 'FETCH_WORKSPACES') {
+        handleFetchWorkspaces().then(sendResponse);
+        return true;
+    }
+
     if (request.type === 'SAVE_PROMPT') {
         handleSavePrompt(request.payload).then(sendResponse);
         return true;
@@ -63,17 +73,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-async function handleFetchPrompts({ search, is_favorite }) {
+async function handleFetchWorkspaces() {
     const { apiUrl, apiToken } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
     if (!apiUrl || !apiToken) return { error: 'Settings missing' };
 
     try {
         const apiUrlBase = getApiUrl(apiUrl);
-        const url = new URL(`${apiUrlBase}prompts`);
-        if (search) url.searchParams.append('search', search);
-        if (is_favorite) url.searchParams.append('is_favorite', '1');
+        const response = await fetch(`${apiUrlBase}workspaces`, {
+            headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Accept': 'application/json'
+            }
+        });
 
-        const response = await fetch(url.toString(), {
+        if (!response.ok) throw new Error('Failed to fetch workspaces');
+        return await response.json();
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+async function handleFetchPrompts({ search, is_favorite, sort, workspace_id, marketplace }) {
+    const { apiUrl, apiToken } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
+    if (!apiUrl || !apiToken) return { error: 'Settings missing' };
+
+    try {
+        const apiUrlBase = getApiUrl(apiUrl);
+        let url = `${apiUrlBase}${marketplace ? 'marketplace' : 'prompts'}?sort=${sort || 'latest'}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (is_favorite) url += `&is_favorite=1`;
+        if (workspace_id) url += `&workspace_id=${workspace_id}`;
+
+        const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${apiToken}`,
                 'Accept': 'application/json'
@@ -88,7 +119,7 @@ async function handleFetchPrompts({ search, is_favorite }) {
     }
 }
 
-async function handleFetchMarketplace({ search }) {
+async function handleFetchMarketplace({ search, sort }) {
     const { apiUrl, apiToken } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
     if (!apiUrl || !apiToken) return { error: 'Settings missing' };
 
@@ -96,6 +127,7 @@ async function handleFetchMarketplace({ search }) {
         const apiUrlBase = getApiUrl(apiUrl);
         const url = new URL(`${apiUrlBase}marketplace`);
         if (search) url.searchParams.append('search', search);
+        if (sort) url.searchParams.append('sort', sort);
 
         const response = await fetch(url.toString(), {
             headers: {
@@ -172,6 +204,27 @@ async function handleDeletePrompt(id) {
         return { error: error.message };
     }
 }
+async function handleIncrementUsage(id) {
+    const { apiUrl, apiToken } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
+    if (!apiUrl || !apiToken) return { error: 'Settings missing' };
+
+    try {
+        const apiUrlBase = getApiUrl(apiUrl);
+        const response = await fetch(`${apiUrlBase}prompts/${id}/increment-usage`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Failed to increment usage');
+        return { success: true };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
 function getApiUrl(apiUrl) {
     const base = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
     return base.endsWith('/api/') ? base : `${base}api/`;

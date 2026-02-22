@@ -3,8 +3,11 @@
 @section('title', 'Prompts Dashboard')
 
 @section('content')
-<div class="flex justify-between items-center mb-4">
-    <h1>All Prompts</h1>
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="mb-0">Prompts Dashboard</h1>
+        <p class="text-muted">Manage your personal prompt library</p>
+    </div>
     <div class="flex gap-2">
         <a href="{{ route('prompts.export') }}" class="btn btn-secondary">
             <i class="fas fa-download"></i> Export

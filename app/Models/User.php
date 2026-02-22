@@ -100,4 +100,21 @@ class User extends Authenticatable
             ? asset('storage/' . $this->avatar) 
             : 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
+
+    public function ownedWorkspaces()
+    {
+        return $this->hasMany(Workspace::class, 'owner_id');
+    }
+
+    public function workspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_members')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
+    }
+
+    public function allWorkspaces()
+    {
+        return $this->ownedWorkspaces->concat($this->workspaces)->unique('id');
+    }
 }

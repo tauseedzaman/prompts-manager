@@ -5,36 +5,39 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class Category extends Model
+class Workspace extends Model
 {
     use HasUuids;
 
     public $incrementing = false;
     protected $keyType = 'string';
+
     protected $fillable = [
-        'user_id',
-        'workspace_id',
         'name',
         'slug',
+        'owner_id',
         'description',
-        'icon',
-        'color',
-        'sort_order',
-        'is_active',
     ];
 
-    public function user()
+    public function owner()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function workspace()
+    public function members()
     {
-        return $this->belongsTo(Workspace::class);
+        return $this->belongsToMany(User::class, 'workspace_members')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
     }
 
     public function prompts()
     {
         return $this->hasMany(Prompt::class);
+    }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
     }
 }

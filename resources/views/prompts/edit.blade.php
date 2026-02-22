@@ -12,6 +12,9 @@
     <form action="{{ route('prompts.update', $prompt) }}" method="POST">
         @csrf
         @method('PUT')
+        @if($prompt->workspace_id)
+            <input type="hidden" name="workspace_id" value="{{ $prompt->workspace_id }}">
+        @endif
 
         <div class="form-group">
             <label for="title" class="form-label">Title</label>

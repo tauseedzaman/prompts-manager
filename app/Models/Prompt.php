@@ -13,6 +13,7 @@ class Prompt extends Model
     protected $keyType = 'string';
     protected $fillable = [
         'user_id',
+        'workspace_id',
         'category_id',
         'title',
         'slug',
@@ -29,6 +30,7 @@ class Prompt extends Model
         'visibility',
         'is_favorite',
         'status',
+        'usage_count',
     ];
 
     protected $casts = [
@@ -46,6 +48,11 @@ class Prompt extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class);
     }
 
     public function tags()
@@ -76,6 +83,11 @@ class Prompt extends Model
     public function scopePublic($query)
     {
         return $query->where('visibility', 'public')->where('status', 'published');
+    }
+
+    public function scopeMostUsed($query)
+    {
+        return $query->orderBy('usage_count', 'desc');
     }
 
     public function getAverageRatingAttribute()

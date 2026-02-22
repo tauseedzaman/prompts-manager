@@ -2,9 +2,32 @@
 
 A powerful open-source prompt management system to **store, organize, search, and reuse AI prompts**.
 
-Built for developers, creators, marketers, and AI power users who constantly work with ChatGPT, Grok, Claude, Gemini, or any LLM.
+Built for developers, creators, marketers, and AI power users who constantly work with LLMs like ChatGPT, Claude, Gemini, and more.
 
 Instead of rewriting prompts again and again — **save them once and reuse forever.**
+
+---
+
+## 📸 Screenshots
+
+### 🏠 Home & Dashboard
+![Landing](docs/screenshots/landing.png)
+
+### 📊 Quick-Add Categories & Tags
+![Suggestions](docs/screenshots/suggestions.png)
+![Categories](docs/screenshots/categories.png)
+![Tags](docs/screenshots/tags.png)
+
+### 👥 Team Workspaces
+![Workspace](docs/screenshots/workspace.png)
+
+### ⚙️ Settings & Profile
+![User Profile](docs/screenshots/user-profile.png)
+![API Tokens](docs/screenshots/manage-api-tokens.png)
+
+### 🧩 Chrome Extension in Action
+![Extension 1](docs/screenshots/gpt-1.png)
+![Extension 2](docs/screenshots/gpt-2.png)
 
 ---
 
@@ -16,42 +39,32 @@ Instead of rewriting prompts again and again — **save them once and reuse fore
 - Tag-based organization
 - Favorites system
 - Archive / restore prompts
-- Duplicate prompt templates
+- Duplicate prompts
+- **Most Used Sorting**: Track and sort prompts by usage frequency.
 
-### 🔎 Smart Search
+### 👥 Team Workspaces (New! 🚀)
+- Create shared workspaces for collaboration.
+- Invite members with role-based access (Admin, Editor, Viewer).
+- Shared prompt and category libraries.
+- Context switching between private and team libraries.
+
+### 🔎 Smart Search & Discovery
 - Full-text search
 - Filter by category, tags, language, tone
-- Quick prompt lookup
-- Recent prompts tracking
-
-### 🧩 Template Variables
-- Dynamic prompts using variables:
-```
-
-Write 10 tweets about {{topic}} in {{language}}
-
-````
-- Auto-detect variables
-- Default values support
-- Render final prompt before copying
-
-### 📦 Collections (Prompt Packs)
-- Group prompts into collections
-- Example: "Grok Video Prompts", "Viral X Posts"
-- Drag & sort ordering
+- **Marketplace**: Browse and import high-quality community prompts.
 
 ### ⭐ Productivity Tools
 - One-click copy
-- Prompt usage tracking
+- Prompt usage tracking (Most Used)
+- Versioning support
 - Import / Export JSON backups
+- Extension support
 - Markdown support
-- Version-ready architecture
 
-### 🤖 Automation Ready
-- API endpoints for integrations
-- Telegram / automation workflow support
-- AI pipeline compatible
-- Browser extension ready
+### 🧩 Chrome Extension (Active Development)
+- Access your prompt library directly from ChatGPT and other sites.
+- One-click injection into target textareas.
+- Full workspace and search support.
 
 ---
 
@@ -70,7 +83,6 @@ Perfect for:
 
 - AI developers
 - Content creators
-- Crypto analysts
 - Marketing teams
 - Automation builders
 - LLM power users
@@ -79,11 +91,10 @@ Perfect for:
 
 ## 🏗️ Tech Stack
 
-- Laravel
+- Laravel 12
 - MySQL / PostgreSQL
-- Blade / Filament (optional admin)
-- REST API ready
-- JSON template engine
+- Blade / Alpine.js
+- REST API
 
 ---
 
@@ -91,8 +102,6 @@ Perfect for:
 
 - AI content generation workflows
 - Social media prompt storage
-- LLM experimentation tracking
-- Prompt engineering research
 - Team prompt sharing
 - Automation pipelines
 
@@ -111,7 +120,7 @@ Perfect for:
 ```bash
 git clone https://github.com/tauseedzaman/prompts-manager.git
 
-cd Prompts-Manager
+cd prompts-manager
 
 composer install
 npm install
@@ -119,11 +128,29 @@ npm install
 cp .env.example .env
 
 php artisan key:generate
-php artisan migrate
+php artisan migrate --seed
 
 npm run build
 php artisan serve
-````
+```
+
+### 🔐 Default Credentials
+Once seeded, you can log in with:
+- **Email:** `test@example.com`
+- **Password:** `password`
+
+---
+
+## 🧩 Chrome Extension Setup
+
+Access your prompts anywhere by installing the companion extension:
+
+1.  Open Chrome and navigate to `chrome://extensions/`.
+2.  Enable **Developer mode** (toggle in the top-right corner).
+3.  Click **Load unpacked**.
+4.  Select the `ext` folder from the root of this project.
+5.  Click the extension icon in your browser and go to **Settings** (gear icon).
+6.  Set your Backend API URL (e.g., `http://127.0.0.1:8000`) and your API Token (found in your Profile settings).
 
 ---
 
@@ -134,32 +161,29 @@ Core entities:
 * Categories
 * Prompts
 * Tags
-* Collections
-* Prompt Runs (analytics)
-* Account Profiles (optional)
+* Workspaces (Owner, Members, Roles)
+* Versions
+* Ratings
 
 ---
 
-## 🔌 API (Planned)
+## 🔌 API
 
 * Create prompt
-* Search prompts
-* Render template
-* Get prompt collections
-* Track usage
+* Search prompts (with sorting)
+* Workspace management
+* Increment usage tracking
 
 ---
 
 ## 🛣️ Roadmap
 
-* Prompt versioning
-* AI prompt optimizer
-* Team collaboration
-* Browser extension
-* Telegram integration
-* Prompt analytics dashboard
-* Cloud sync
-* Marketplace for prompt packs
+* [x] Team collaboration
+* [x] Browser extension (v1)
+* [x] Marketplace for prompt packs
+* [ ] AI prompt optimizer
+* [ ] Telegram integration
+* [ ] Cloud sync
 
 ---
 
