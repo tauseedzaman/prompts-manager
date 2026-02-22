@@ -64,7 +64,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         promptsList.innerHTML = '<p class="empty-msg">Loading...</p>';
 
         try {
-            const url = new URL(`${apiUrl}/prompts`);
+            const apiUrlBase = getApiUrl(apiUrl);
+            const url = new URL(`${apiUrlBase}prompts`);
             if (search) url.searchParams.append('search', search);
 
             const response = await fetch(url.toString(), {
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function debounce(func, wait) {
         let timeout;
-        return function(...args) {
+        return function (...args) {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(this, args), wait);
         };

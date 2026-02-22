@@ -17,7 +17,8 @@ async function handleFetchPrompts({ search }) {
     if (!apiUrl || !apiToken) return { error: 'Settings missing' };
 
     try {
-        const url = new URL(`${apiUrl}/prompts`);
+        const apiUrlBase = getApiUrl(apiUrl);
+        const url = new URL(`${apiUrlBase}prompts`);
         if (search) url.searchParams.append('search', search);
 
         const response = await fetch(url.toString(), {
@@ -40,7 +41,8 @@ async function handleSavePrompt(payload) {
     if (!apiUrl || !apiToken) return { error: 'Settings missing' };
 
     try {
-        const response = await fetch(`${apiUrl}/prompts`, {
+        const apiUrlBase = getApiUrl(apiUrl);
+        const response = await fetch(`${apiUrlBase}prompts`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiToken}`,
@@ -60,4 +62,8 @@ async function handleSavePrompt(payload) {
     } catch (error) {
         return { error: error.message };
     }
+}
+function getApiUrl(apiUrl) {
+    const base = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+    return base.endsWith('/api/') ? base : `${base}api/`;
 }
